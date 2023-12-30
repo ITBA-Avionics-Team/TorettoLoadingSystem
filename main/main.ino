@@ -3,6 +3,7 @@
 #include "ElectromechanicalModule.h"
 #include "CommunicationModule.h"
 #include "SensorModule.h"
+#include "WeatherModule.h"
 #include "SystemStatus.h"
 #include <stdint.h>
 #include <string>
@@ -15,16 +16,20 @@ const int MAX_TANK_PRESSURE_PSI = 100;
 
 const float TANK_DEPRESS_VENT_LOW_TEMP = 10;
 
+const float OBEC_LOWEST_BATTERY_VOLTAGE = 4;
+
 
 // System status variables
 SystemStatus system_status = SystemStatus();
 unsigned long last_milis = 0;
+unsigned long preflight_check_time = 0;
 
 // Modules
 StorageModule storage_module = StorageModule();
 ControlModule control_module = ControlModule();
 SensorModule sensor_module = SensorModule();
 CommunicationModule communication_module = CommunicationModule();
+WeatherModule weather_module = WeatherModule();
 
 void setup()
 {
@@ -86,11 +91,17 @@ void switch_to_state(State newState)
     control_module.set_obec_power(false);
     delay(2000);
     preflight_check_data.obec_battery_voltage_volt = system_status.obec_battery_voltage_volt;
-    preflight_check_data.lc_battery_voltage_volt = system_status.lc_battery_voltage_volt;
-    preflight_check_data.flight_computers_status = new FlightComputerStatus(system_status.)
-    
-
-
+    if (preflight_check_data.obec_battery_voltage_volt > OBEC_LOWEST_BATTERY_VOLTAGE) {
+      preflight_check_data.lc_battery_voltage_volt = system_status.lc_battery_voltage_volt;
+      preflight_check_data.flight_computers_status = new FlightComputerStatus(true, true, true); // TODO: CHECK FLIGHT COMPUTERS STATUS
+      preflight_check_data.igniter_continuity_ok = system_status.igniter_continuity_ok;
+      preflight_check_data.weather_data = new WeatherData(weather_module.get_wind());  
+    } else {
+      control_module.set_obec_power(true);
+    }
+    communication_module.send_preflight_check_data_to_MCC(preflight_check_data);
+    preflight_check_time = millis();
+    switch_to_state(STANDBY);
     break;
   }
 }

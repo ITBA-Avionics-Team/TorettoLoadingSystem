@@ -11,7 +11,6 @@ class PreflightCheckData {
   FlightComputersStatus flight_computers_status;
   bool igniter_continuity_ok;
   WeatherData weather_data;
-
 };
 
 class FlightComputersStatus {

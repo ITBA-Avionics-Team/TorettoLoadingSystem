@@ -54,6 +54,10 @@ class CommunicationModule {
       mcc_xbee.send_system_status(system_status);
     }
 
+    void send_preflight_check_data_to_MCC(PreflightCheckData data) {
+      mcc_xbee.send_preflight_check(data);
+    }
+
     void send_tank_depress_vent_temp_low_to_MCC() {
       mcc_xbee.tank_depress_vent_tamp_low();
     }
