@@ -26,6 +26,7 @@ class SystemStatus {
   bool loading_depress_vent_valve_open;
   bool hydraulic_umbrilical_connected;
   bool igniter_continuity_ok;
+  bool external_vent_as_default;
   int wind_kt;
 };
 

@@ -62,6 +62,10 @@ class CommunicationModule {
       mcc_xbee.tank_depress_vent_tamp_low();
     }
 
+    void send_external_vent_as_default_prompt_to_MCC() {
+      mcc_xbee.send_external_vent_as_default_prompt()
+    }
+
     ValveCommand check_for_mcc_commands(){
       ValveCommand command = mcc_xbee.check_for_commands();
       return command;
