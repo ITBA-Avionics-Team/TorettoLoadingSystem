@@ -162,7 +162,12 @@ void switch_to_state(State newState)
       break;
     
     case ABORT:
-      
+      communication_module.send_valve_command_to_OBEC(new ValveCommand(Open, TANK_DEPRESS_VENT_VALVE));
+      control_module.execute_valve_command(new ValveCommand(Open, LOADING_LINE_DEPRESS_VENT_VALVE))
+      communication_module.send_valve_command_to_OBEC(new ValveCommand(Close, ENGINE_VALVE));
+      control_module.execute_valve_command(new ValveCommand(Close, LOADING_VALVE));
+      control_module.set_igniters_on(false);
+      communication_module.send_abort_signal_to_OBEC();
   }
 }
 
