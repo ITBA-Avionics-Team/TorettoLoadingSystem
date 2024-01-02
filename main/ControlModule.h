@@ -13,9 +13,9 @@ class ControlModule {
     void set_igniters_on(bool true) {
 
     }
+    
+    void disconnect_umbrilical() {
 
-    void send_abort_signal_to_OBEC() {
-      
     }
 
 };

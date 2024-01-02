@@ -15,6 +15,7 @@ const int MAX_LOADING_LINE_PRESSURE_PSI = 100;
 const int MAX_TANK_PRESSURE_PSI = 100;
 const unsigned long MAX_PRESSURE_WARNING_TIME_MILLIS = 20000;
 const unsigned long MAX_PRESSURE_WARNING_TIME_EXT_VENT_MILLIS = 20000;
+const int MAX_LAUNCH_WIND_KT = 12;
 
 const float TANK_DEPRESS_VENT_LOW_TEMP = 10;
 
@@ -26,6 +27,8 @@ SystemStatus system_status = SystemStatus();
 unsigned long last_milis = 0;
 unsigned long preflight_check_time = 0;
 unsigned long standby_pressure_warning_start_time = 0;
+unsigned long pre_launch_start_time = 0;
+unsigned long umbrilical_disconnect_time = 0;
 
 // Modules
 StorageModule storage_module = StorageModule();
@@ -107,6 +110,32 @@ void loop()
       lastMilis = currMillis;
     }
     break;
+    case PRE_LAUNCH_WIND_CHECK:
+     if (currMillis - lastMilis > 500)
+     {
+        if (weather_module.get_wind_kt() > MAX_LAUNCH_WIND_KT) {
+          communication_module.send_wind_abort_to_MCC();
+          switch_to_state(STANDBY);
+        } else if (millis() - prelaunch_start_time > 5000) {
+          switch_to_state(PRE_LAUNCH_UMBRILICAL_DISCONNECT);
+        } 
+        lastMilis = currMillis;
+      }
+      break;
+    case PRE_LAUNCH_UMBRILICAL_DISCONNECT:
+      if (milis() - umbrilical_disconnect_time > 600)
+      {
+        if (!sensor_module.umbrilical_connected()) {
+          communication_module.send_umbrilical_abort_to_MCC();
+          break;
+        }
+        if (milis() - umbrilical_disconnect_time > 10000) {
+          switch_to_state(IGNITION);
+        }
+      }
+      break;
+    case IGNITION: 
+      break;
   }
 }
 
@@ -160,7 +189,18 @@ void switch_to_state(State newState)
       preflight_check_time = millis();
       switch_to_state(STANDBY);
       break;
-    
+    case PRE_LAUNCH_WIND_CHECK:
+      if (millis() - preflight_check_time > 10000) {
+        communication_module.send_stale_flight_check_to_MCC();
+        switch_to_state(STANDBY);
+      } else {
+        pre_launch_start_time = milllis();  
+      }
+      break;
+    case PRE_LAUNCH_UMBRILICAL_DISCONNECT:
+      control_module.disconnect_umbrilical();
+      umbrilical_disconnect_time = milis();
+      break;
     case ABORT:
       communication_module.send_valve_command_to_OBEC(new ValveCommand(Open, TANK_DEPRESS_VENT_VALVE));
       control_module.execute_valve_command(new ValveCommand(Open, LOADING_LINE_DEPRESS_VENT_VALVE))
@@ -168,6 +208,7 @@ void switch_to_state(State newState)
       control_module.execute_valve_command(new ValveCommand(Close, LOADING_VALVE));
       control_module.set_igniters_on(false);
       communication_module.send_abort_signal_to_OBEC();
+      break;
   }
 }
 

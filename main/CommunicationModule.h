@@ -50,12 +50,28 @@ class CommunicationModule {
       obec_communication.send_valve_command(command);
     }
 
+    void send_abort_signal_to_OBEC() {
+
+    }
+
     void send_system_status_to_MCC(SystemStatus system_status) {
       mcc_xbee.send_system_status(system_status);
     }
 
     void send_preflight_check_data_to_MCC(PreflightCheckData data) {
       mcc_xbee.send_preflight_check(data);
+    }
+
+    void send_stale_flight_check_to_MCC() {
+
+    }
+
+    void send_wind_abort_to_MCC() {
+
+    }
+
+    void send_umbrilical_abort_to_MCC() {
+      
     }
 
     void send_tank_depress_vent_temp_low_to_MCC() {
@@ -70,6 +86,7 @@ class CommunicationModule {
       ValveCommand command = mcc_xbee.check_for_commands();
       return command;
     }
+
     void check_for_obec_status(){
       OBECStatus status = obec_communication.check_for_status_message();
       return status;
