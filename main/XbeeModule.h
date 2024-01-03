@@ -47,8 +47,8 @@ class XBeeModule {
 
     // void loop();
 
-    ValveCommand check_for_commands(){
-      return ValveCommand(Open, ENGINE_VALVE);
+    Command check_for_commands(){
+      return Command(ValveCommand, Open, ENGINE_VALVE);
     }
 
     void check_for_status_message() {

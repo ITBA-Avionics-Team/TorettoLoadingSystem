@@ -8,7 +8,7 @@ class ControlModule {
 
   public:
 
-    void execute_valve_command(ValveCommand command) {
+    void execute_valve_command(Command command) {
 
     }
 

@@ -34,7 +34,7 @@ class RS485Module {
       return OBECStatus();
     }
 
-    void send_valve_command(ValveCommand command) {
+    void send_valve_command(Command command) {
 
     }
 };

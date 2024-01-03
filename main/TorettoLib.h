@@ -1,3 +1,6 @@
+#define Close 0
+#define Open 255
+
 // SystemStatus.h
 enum State
 {
@@ -53,21 +56,64 @@ enum Valve {
   LOADING_LINE_DEPRESS_VENT_VALVE
 };
 
-enum ValveAction {
-  Open,
-  Close
+// enum ValveAction {
+//   Open,
+//   Close
+// };
+
+enum CommandType {
+  ValveCommand,
+  SwitchStateCommand,
+  SetExternalVentAsDefaultCommand
 };
 
-class ValveCommand {
+class Command {
   public:
-    ValveAction action;
-    Valve valve;
-
-    ValveCommand(ValveAction actionVal, Valve valveVal) {
-      action = actionVal;
-      valve = valveVal;
-    }
+  CommandType type;
+  int int_value;
+  Valve valve;
+  State state;
+  bool bool_value;
+  Command(CommandType type_val, int int_value_val, Valve valve_val) {
+    type = type_val;
+    valve = valve_val;
+    int_value = int_value_val;
+  };
+  Command(CommandType type_val, State state_val) {
+    type = type_val;
+    state = state_val;
+  };
+  Command(CommandType type_val, bool bool_value_val) {
+    type = type_val;
+    bool_value = bool_value_val;
+  };
+  Command(){}
 };
+
+// class ValveCommand: Command {
+//   public:
+//     ValveAction action;
+//     Valve valve;
+
+//     ValveCommand(ValveAction actionVal, Valve valveVal) {
+//       action = actionVal;
+//       valve = valveVal;
+//     }
+// };
+
+// class SwitchStateCommand: Command {
+//   State state;
+//   SwitchStateCommand(State val) {
+//     state = val;
+//   }
+// }
+
+// class SetExternalVentAsDefaultCommand: Command {
+//   bool ext_vent_as_default;
+//   SetExternalVentAsDefaultCommand(bool val) {
+//     ext_vent_as_default = val;
+//   }
+// }
 
 
 // PreflightCheck.h

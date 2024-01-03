@@ -26,7 +26,17 @@ class CommunicationModule {
   RS485Module obec_communication;
 
   public:
-    void send_valve_command_to_OBEC(ValveCommand command) {\
+    Command latest_MCC_command;
+    OBECStatus latest_OBEC_status;
+
+    bool new_MCC_command_available = false;
+    bool new_OBEC_status_available = false;
+
+    CommunicationModule() {
+      // latest_MCC_command = Command(SetExternalVentAsDefaultCommand, false);
+    }
+
+    void send_valve_command_to_OBEC(Command command) {\
       obec_communication.send_valve_command(command);
     }
 
@@ -70,13 +80,13 @@ class CommunicationModule {
       mcc_xbee.send_ignition_confirmation();
     }
 
-    ValveCommand check_for_MCC_commands(){
-      ValveCommand command = mcc_xbee.check_for_commands();
-      return command;
+    void check_for_MCC_commands(){
+      Command command = mcc_xbee.check_for_commands();
+      // return command;
     }
 
-    OBECStatus check_for_OBEC_status(){
+    void check_for_OBEC_status(){
       OBECStatus status = obec_communication.check_for_status_message();
-      return status;
+      // return status;
     }
 };

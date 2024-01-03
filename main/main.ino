@@ -57,6 +57,24 @@ void loop()
 {
   unsigned long currMilis = millis();
 
+  communication_module.check_for_MCC_commands();
+  communication_module.check_for_OBEC_status();
+  if (communication_module.new_MCC_command_available) {
+    Command command = communication_module.latest_MCC_command;
+    switch(command.type){
+      case ValveCommand:
+        break;
+      case SwitchStateCommand:
+        break;
+      case SetExternalVentAsDefaultCommand:
+        break;
+    }
+  }
+
+  if (communication_module.new_OBEC_status_available) {
+
+  }
+
   switch (system_status.current_state)
   {
   case STANDBY:
@@ -76,8 +94,8 @@ void loop()
     if (currMilis - last_milis > 100)
     {
       if (system_status.tank_depress_vent_temperature_celsius < TANK_DEPRESS_VENT_LOW_TEMP) {
-        control_module.execute_valve_command(ValveCommand(Close, LOADING_VALVE));
-        communication_module.send_valve_command_to_OBEC(ValveCommand(Close, TANK_DEPRESS_VENT_VALVE));
+        control_module.execute_valve_command(Command(ValveCommand, Close, LOADING_VALVE));
+        communication_module.send_valve_command_to_OBEC(Command(ValveCommand, Close, TANK_DEPRESS_VENT_VALVE));
         switch_to_state(STANDBY);
       } 
       
@@ -142,7 +160,7 @@ void loop()
       }
     case IGNITION_OPEN_VALVE:
       if (currMilis - ignition_start_time < 3000) {
-        communication_module.send_valve_command_to_OBEC(ValveCommand(Open, ENGINE_VALVE)); // TODO: I think we should open this valve gradually, which implies a modification of the ValveComand structure.
+        communication_module.send_valve_command_to_OBEC(Command(ValveCommand, Open, ENGINE_VALVE)); // TODO: I think we should open this valve gradually, which implies a modification of the ValveComand structure.
         // Value between 0 and 255 would look something like
         // (((currMilis - ignition_start_time) - 500) / 2500) * 255
         // We might want to make this discrete by using last_milis like we do in other states.
@@ -167,7 +185,7 @@ void switch_to_state(State newState)
   switch (system_status.current_state)
   {
     case STANDBY_PRESSURE_WARNING:
-      communication_module.send_valve_command_to_OBEC(ValveCommand(Open, TANK_DEPRESS_VENT_VALVE));
+      communication_module.send_valve_command_to_OBEC(Command(ValveCommand, Open, TANK_DEPRESS_VENT_VALVE));
       standby_pressure_warning_start_time = millis();
       delay(1000); // TODO: Handle these delays without blocking the processor
       break;
@@ -177,14 +195,14 @@ void switch_to_state(State newState)
     case LOADING:
       if (system_status.loading_line_pressure_psi < MAX_LOADING_LINE_PRESSURE_PSI &&
             system_status.tank_pressure_psi < TANK_PRESSURE_WARN_PSI){
-        communication_module.send_valve_command_to_OBEC(ValveCommand(Close, ENGINE_VALVE));
-        control_module.execute_valve_command(ValveCommand(Close, LOADING_LINE_DEPRESS_VENT_VALVE));
-        communication_module.send_valve_command_to_OBEC(ValveCommand(Open, TANK_DEPRESS_VENT_VALVE));
+        communication_module.send_valve_command_to_OBEC(Command(ValveCommand, Close, ENGINE_VALVE));
+        control_module.execute_valve_command(Command(ValveCommand, Close, LOADING_LINE_DEPRESS_VENT_VALVE));
+        communication_module.send_valve_command_to_OBEC(Command(ValveCommand, Open, TANK_DEPRESS_VENT_VALVE));
         if (system_status.tank_depress_vent_temperature_celsius < TANK_DEPRESS_VENT_LOW_TEMP) {
           communication_module.send_tank_depress_vent_temp_low_to_MCC();
           switch_to_state(STANDBY);
         } else {
-          control_module.execute_valve_command(ValveCommand(Open, LOADING_VALVE));
+          control_module.execute_valve_command(Command(ValveCommand, Open, LOADING_VALVE));
         }
       }
       break;
@@ -232,10 +250,10 @@ void switch_to_state(State newState)
       communication_module.send_ignition_confirmation_to_MCC();
       break;
     case ABORT:
-      communication_module.send_valve_command_to_OBEC(ValveCommand(Open, TANK_DEPRESS_VENT_VALVE));
-      control_module.execute_valve_command(ValveCommand(Open, LOADING_LINE_DEPRESS_VENT_VALVE));
-      communication_module.send_valve_command_to_OBEC(ValveCommand(Close, ENGINE_VALVE));
-      control_module.execute_valve_command(ValveCommand(Close, LOADING_VALVE));
+      communication_module.send_valve_command_to_OBEC(Command(ValveCommand, Open, TANK_DEPRESS_VENT_VALVE));
+      control_module.execute_valve_command(Command(ValveCommand, Open, LOADING_LINE_DEPRESS_VENT_VALVE));
+      communication_module.send_valve_command_to_OBEC(Command(ValveCommand, Close, ENGINE_VALVE));
+      control_module.execute_valve_command(Command(ValveCommand, Close, LOADING_VALVE));
       control_module.set_igniters_on(false);
       communication_module.send_abort_signal_to_OBEC();
       break;
