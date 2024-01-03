@@ -54,6 +54,10 @@ class CommunicationModule {
 
     }
 
+    void send_ignition_confirmation_to_OBEC() {
+
+    }
+
     void send_system_status_to_MCC(SystemStatus system_status) {
       mcc_xbee.send_system_status(system_status);
     }
@@ -71,7 +75,7 @@ class CommunicationModule {
     }
 
     void send_umbrilical_abort_to_MCC() {
-      
+
     }
 
     void send_tank_depress_vent_temp_low_to_MCC() {
@@ -82,12 +86,16 @@ class CommunicationModule {
       mcc_xbee.send_external_vent_as_default_prompt()
     }
 
-    ValveCommand check_for_mcc_commands(){
+    void send_ignition_confirmation_to_MCC() {
+      mcc_xbee.send_ignition_confirmation()
+    }
+
+    ValveCommand check_for_MCC_commands(){
       ValveCommand command = mcc_xbee.check_for_commands();
       return command;
     }
 
-    void check_for_obec_status(){
+    void check_for_OBEC_status(){
       OBECStatus status = obec_communication.check_for_status_message();
       return status;
     }

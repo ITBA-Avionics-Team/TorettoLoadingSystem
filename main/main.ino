@@ -29,6 +29,7 @@ unsigned long preflight_check_time = 0;
 unsigned long standby_pressure_warning_start_time = 0;
 unsigned long pre_launch_start_time = 0;
 unsigned long umbrilical_disconnect_time = 0;
+unsigned long ignition_start_time = 0;
 
 // Modules
 StorageModule storage_module = StorageModule();
@@ -53,12 +54,12 @@ void setup()
 
 void loop()
 {
-  unsigned long currMillis = millis();
+  unsigned long currMilis = millis();
 
   switch (currentState)
   {
   case STANDBY:
-    if (currMillis - lastMilis > 100)
+    if (currMilis - lastMilis > 100)
     {
       if (system_status.tank_pressure_psi > TANK_PRESSURE_WARN_PSI) {
         if (system_status.external_vent_as_default) {
@@ -67,11 +68,11 @@ void loop()
           switch_to_state(STANDBY_PRESSURE_WARNING);
         }
       }
-      lastMilis = currMillis;
+      lastMilis = currMilis;
     }
     break;
   case LOADING:
-    if (currMillis - lastMilis > 100)
+    if (currMilis - lastMilis > 100)
     {
       if (system_status.tank_depress_vent_temperature_celsius < TANK_DEPRESS_VENT_LOW_TEMP) {
         control_module.execute_valve_command(new ValveCommand(Close, LOADING_VALVE));
@@ -79,11 +80,11 @@ void loop()
         switch_to_state(STANDBY);
       } 
       
-      lastMilis = currMillis;
+      lastMilis = currMilis;
     }
     break;
   case STANDBY_PRESSURE_WARNING:
-    if (currMillis - lastMilis > 500)
+    if (currMilis - lastMilis > 500)
     {
       if (system_status.tank_pressure_psi > TANK_PRESSURE_WARN_PSI) {
         if (millis() - standby_pressure_warning_start_time > MAX_PRESSURE_WARNING_TIME_MILLIS) {
@@ -92,11 +93,11 @@ void loop()
       } else {
         switch_to_state(STANDBY);
       }
-      lastMilis = currMillis;
+      lastMilis = currMilis;
     }
     break;
   case STANDBY_PRESSURE_WARNING_EXTERNAL_VENT:
-    if (currMillis - lastMilis > 500)
+    if (currMilis - lastMilis > 500)
     {
       if (system_status.tank_pressure_psi > TANK_PRESSURE_WARN_PSI) {
         if (millis() - standby_pressure_warning_start_time > MAX_PRESSURE_WARNING_TIME_EXT_VENT_MILLIS) {
@@ -107,11 +108,11 @@ void loop()
         communication_module.send_external_vent_as_default_prompt_to_MCC();
         switch_to_state(STANDBY);
       }
-      lastMilis = currMillis;
+      lastMilis = currMilis;
     }
     break;
     case PRE_LAUNCH_WIND_CHECK:
-     if (currMillis - lastMilis > 500)
+     if (currMilis - lastMilis > 500)
      {
         if (weather_module.get_wind_kt() > MAX_LAUNCH_WIND_KT) {
           communication_module.send_wind_abort_to_MCC();
@@ -119,22 +120,40 @@ void loop()
         } else if (millis() - prelaunch_start_time > 5000) {
           switch_to_state(PRE_LAUNCH_UMBRILICAL_DISCONNECT);
         } 
-        lastMilis = currMillis;
+        lastMilis = currMilis;
       }
       break;
     case PRE_LAUNCH_UMBRILICAL_DISCONNECT:
-      if (milis() - umbrilical_disconnect_time > 600)
+      if (currMilis - umbrilical_disconnect_time > 600)
       {
         if (!sensor_module.umbrilical_connected()) {
           communication_module.send_umbrilical_abort_to_MCC();
           break;
         }
-        if (milis() - umbrilical_disconnect_time > 10000) {
+        if (currMilis - umbrilical_disconnect_time > 10000) {
           switch_to_state(IGNITION);
         }
       }
       break;
-    case IGNITION: 
+    case IGNITION_IGNITERS_ON: 
+      if (currMilis - ignition_start_time > 500) {
+        switch_to_state(IGNITION_OPEN_VALVE);
+      }
+    case IGNITION_OPEN_VALVE:
+      if (currMilis - ignition_start_time < 3000) {
+        communication_module.send_valve_command(new ValveCommand(Open, ENGINE_VALVE)); // TODO: I think we should open this valve gradually, which implies a modification of the ValveComand structure.
+        // Value between 0 and 255 would look something like
+        // (((currMilis - ignition_start_time) - 500) / 2500) * 255
+        // We might want to make this discrete by using lastMilis like we do in other states.
+      } else {
+        switch_to_state(IGNITION_IGNITERS_OFF);
+      }
+      break;
+    case IGNITION_IGNITERS_OFF:
+      if (currMilis - ignition_start_time > 4000) {
+        control_module.set_igniters_on(false);
+        switch_to_state(STANDBY);
+      }
       break;
   }
 }
@@ -201,6 +220,14 @@ void switch_to_state(State newState)
       control_module.disconnect_umbrilical();
       umbrilical_disconnect_time = milis();
       break;
+    case IGNITION_IGNITERS_ON:
+      control_module.set_igniters_on(true);
+      ignition_start_time = milis();
+      break;
+    case IGNITION_IGNITERS_OFF:
+      communication_module.send_ignition_confirmation_to_OBEC();
+      communication_module.send_ignition_confirmation_to_MCC();
+      break;
     case ABORT:
       communication_module.send_valve_command_to_OBEC(new ValveCommand(Open, TANK_DEPRESS_VENT_VALVE));
       control_module.execute_valve_command(new ValveCommand(Open, LOADING_LINE_DEPRESS_VENT_VALVE))
@@ -208,6 +235,8 @@ void switch_to_state(State newState)
       control_module.execute_valve_command(new ValveCommand(Close, LOADING_VALVE));
       control_module.set_igniters_on(false);
       communication_module.send_abort_signal_to_OBEC();
+      break;
+    default:
       break;
   }
 }
