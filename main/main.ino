@@ -1,14 +1,11 @@
 #include "Logger.h"
 #include "ControlModule.h"
-#include "ElectromechanicalModule.h"
 #include "CommunicationModule.h"
 #include "SensorModule.h"
 #include "WeatherModule.h"
 #include "SystemStatus.h"
 #include <stdint.h>
-#include <string>
-#include <format>
-#include <vector>
+#include <string.h>
 
 
 const int MAX_LOADING_LINE_PRESSURE_PSI = 100;
@@ -245,13 +242,19 @@ void switch_to_state(State newState)
 // Example result (minus the spaces): STBY 0014 10.1 25.2 0014 4.12 4.20 ? 008
 string create_LC_status_packet_str(SystemStatus status)
 {
+  char buffer[10];
   Logger::debug("Creating telemetry packet...");
   string state_str = get_state_string(status.current_state);
-  string tank_pressure_str = std::format("{:0{}}", status.tank_pressure_psi, 4); // 4 is the desired number of digits (using leading zeroes)
-  string tank_temperature_str = std::format("{:.1f}", status.tank_temperature_celsius);
-  string loading_line_pressure_str = std::format("{:0{}}", status.loading_line_pressure_psi, 4); // 4 is the desired number of digits (using leading zeroes)
-  string obec_battery_voltage_str = std::format("{:.12f}", status.obec_battery_voltage_volt);
-  string lc_battery_voltage_str = std::format("{:.12f}", status.lc_battery_voltage_volt);
+  sprintf(buffer, "%0*d", 4, status.tank_pressure_psi); // 4 is the desired number of digits (using leading zeroes)
+  string tank_pressure_str(buffer);
+  sprintf(buffer, "%.1f", status.tank_temperature_celsius);
+  string tank_temperature_str(buffer);
+  sprintf(buffer, "%0*d", 4, status.loading_line_pressure_psi); // 4 is the desired number of digits (using leading zeroes)
+  string loading_line_pressure_str(buffer); 
+  sprintf(buffer, "%.12f", status.obec_battery_voltage_volt);
+  string obec_battery_voltage_str(buffer);
+  sprintf(buffer, "%.12f", status.lc_battery_voltage_volt);
+  string lc_battery_voltage_str(buffer);
   string status_flags_str = string(create_status_flags_byte(status.obec_connection_ok,
                                                             status.tank_depress_vent_valve_open,
                                                             status.engine_valve_open,
@@ -259,7 +262,9 @@ string create_LC_status_packet_str(SystemStatus status)
                                                             status.loading_depress_vent_valve_open,
                                                             status.hydraulic_umbrilical_connected,
                                                             status.igniter_continuity_ok), 1);
-  string wind_str = std::format("{:0{}}", wind_kt, 3); // 3 is the desired number of digits (using leading zeroes)
+  
+  sprintf(buffer, "%0*d", 3, wind_kt); // 3 is the desired number of digits (using leading zeroes)
+  string wind_str(buffer);
 
   return state_str +
           tank_pressure_str +
@@ -293,4 +298,8 @@ char create_status_flags_byte(bool obec_connection_ok,
     result<<1;
     if (igniter_continuity_ok) result++;
     return result;
+}
+
+string get_state_string(State state) {
+  return "STBY" //TODO: Implement
 }
