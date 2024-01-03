@@ -1,5 +1,8 @@
 
+#ifndef LOGGER_H
+#define LOGGER_H
 #include "Logger.h"
+#endif // LOGGER_H
 
 class SensorModule {
   public:

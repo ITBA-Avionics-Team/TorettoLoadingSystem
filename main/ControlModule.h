@@ -1,3 +1,9 @@
+#ifndef TORETTOLIB_H
+#define TORETTOLIB_H
+
+#include "TorettoLib.h"
+#endif // TORETTOLIB_H
+
 class ControlModule {
 
   public:
@@ -10,7 +16,7 @@ class ControlModule {
 
     }
 
-    void set_igniters_on(bool true) {
+    void set_igniters_on(bool value) {
 
     }
     

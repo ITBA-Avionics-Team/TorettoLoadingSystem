@@ -2,6 +2,10 @@
 #include <stdint.h>
 
 #include <Preferences.h>
+#ifndef TORETTOLIB_H
+#define TORETTOLIB_H
+#include "TorettoLib.h"
+#endif // TORETTOLIB_H
 
 #define CURRENT_STATE_KEY "curr_state"
 #define PACKET_COUNT_KEY "packet_count"
@@ -20,15 +24,16 @@ class StorageModule {
       packetCount = loadTelemetryPacketCount();
     }
 
-    uint8_t loadCurrentState(uint8_t defaultState) {
-      uint8_t savedState = preferences.getUChar(CURRENT_STATE_KEY, 255); // 255 is the default value returned if no saved state is found
-      if (savedState == 255) {
-        Logger::debug("No previous state found in memory, defaulting to " + String(defaultState));
-        return defaultState;
-      } else {
-        Logger::debug("Found previous state in memory: " + String(savedState));
-        return savedState;
-      }
+    State load_current_state(State defaultState) {
+      return STANDBY; //TODO: Implement
+      // uint8_t savedState = preferences.getUChar(CURRENT_STATE_KEY, 255); // 255 is the default value returned if no saved state is found
+      // if (savedState == 255) {
+      //   Logger::debug("No previous state found in memory, defaulting to " + String(defaultState));
+      //   return defaultState;
+      // } else {
+      //   Logger::debug("Found previous state in memory: " + String(savedState));
+      //   return savedState;
+      // }
     }
 
     void saveCurrentState(uint8_t currentState) {

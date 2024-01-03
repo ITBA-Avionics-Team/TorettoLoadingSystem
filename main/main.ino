@@ -1,4 +1,8 @@
+#ifndef LOGGER_H
+#define LOGGER_H
 #include "Logger.h"
+#endif // LOGGER_H
+#include "StorageModule.h"
 #include "ControlModule.h"
 #include "CommunicationModule.h"
 #include "SensorModule.h"
@@ -9,7 +13,7 @@
 
 
 const int MAX_LOADING_LINE_PRESSURE_PSI = 100;
-const int MAX_TANK_PRESSURE_PSI = 100;
+const int TANK_PRESSURE_WARN_PSI = 100;
 const unsigned long MAX_PRESSURE_WARNING_TIME_MILLIS = 20000;
 const unsigned long MAX_PRESSURE_WARNING_TIME_EXT_VENT_MILLIS = 20000;
 const int MAX_LAUNCH_WIND_KT = 12;
@@ -40,23 +44,23 @@ void setup()
   Serial.begin(9600);
 
   storage_module.init();
-  sensor_module.init();
-  electromechanical_module.init();
-  communication_module.init();
+  // sensor_module.init();
+  // electromechanical_module.init();
+  // communication_module.init();
 
-  lastMilis = millis();
+  last_milis = millis();
 
-  switchToState(storageModule.loadCurrentState(STATUS));
+  switch_to_state(storage_module.load_current_state(STANDBY));
 }
 
 void loop()
 {
   unsigned long currMilis = millis();
 
-  switch (currentState)
+  switch (system_status.current_state)
   {
   case STANDBY:
-    if (currMilis - lastMilis > 100)
+    if (currMilis - last_milis > 100)
     {
       if (system_status.tank_pressure_psi > TANK_PRESSURE_WARN_PSI) {
         if (system_status.external_vent_as_default) {
@@ -65,23 +69,23 @@ void loop()
           switch_to_state(STANDBY_PRESSURE_WARNING);
         }
       }
-      lastMilis = currMilis;
+      last_milis = currMilis;
     }
     break;
   case LOADING:
-    if (currMilis - lastMilis > 100)
+    if (currMilis - last_milis > 100)
     {
       if (system_status.tank_depress_vent_temperature_celsius < TANK_DEPRESS_VENT_LOW_TEMP) {
-        control_module.execute_valve_command(new ValveCommand(Close, LOADING_VALVE));
-        communication_module.send_valve_command_to_OBEC(new ValveCommand(Close, TANK_DEPRESS_VENT_VALVE));
+        control_module.execute_valve_command(ValveCommand(Close, LOADING_VALVE));
+        communication_module.send_valve_command_to_OBEC(ValveCommand(Close, TANK_DEPRESS_VENT_VALVE));
         switch_to_state(STANDBY);
       } 
       
-      lastMilis = currMilis;
+      last_milis = currMilis;
     }
     break;
   case STANDBY_PRESSURE_WARNING:
-    if (currMilis - lastMilis > 500)
+    if (currMilis - last_milis > 500)
     {
       if (system_status.tank_pressure_psi > TANK_PRESSURE_WARN_PSI) {
         if (millis() - standby_pressure_warning_start_time > MAX_PRESSURE_WARNING_TIME_MILLIS) {
@@ -90,11 +94,11 @@ void loop()
       } else {
         switch_to_state(STANDBY);
       }
-      lastMilis = currMilis;
+      last_milis = currMilis;
     }
     break;
   case STANDBY_PRESSURE_WARNING_EXTERNAL_VENT:
-    if (currMilis - lastMilis > 500)
+    if (currMilis - last_milis > 500)
     {
       if (system_status.tank_pressure_psi > TANK_PRESSURE_WARN_PSI) {
         if (millis() - standby_pressure_warning_start_time > MAX_PRESSURE_WARNING_TIME_EXT_VENT_MILLIS) {
@@ -105,19 +109,19 @@ void loop()
         communication_module.send_external_vent_as_default_prompt_to_MCC();
         switch_to_state(STANDBY);
       }
-      lastMilis = currMilis;
+      last_milis = currMilis;
     }
     break;
     case PRE_LAUNCH_WIND_CHECK:
-     if (currMilis - lastMilis > 500)
+     if (currMilis - last_milis > 500)
      {
         if (weather_module.get_wind_kt() > MAX_LAUNCH_WIND_KT) {
           communication_module.send_wind_abort_to_MCC();
           switch_to_state(STANDBY);
-        } else if (millis() - prelaunch_start_time > 5000) {
+        } else if (millis() - pre_launch_start_time > 5000) {
           switch_to_state(PRE_LAUNCH_UMBRILICAL_DISCONNECT);
         } 
-        lastMilis = currMilis;
+        last_milis = currMilis;
       }
       break;
     case PRE_LAUNCH_UMBRILICAL_DISCONNECT:
@@ -128,7 +132,7 @@ void loop()
           break;
         }
         if (currMilis - umbrilical_disconnect_time > 10000) {
-          switch_to_state(IGNITION);
+          switch_to_state(IGNITION_IGNITERS_ON);
         }
       }
       break;
@@ -138,10 +142,10 @@ void loop()
       }
     case IGNITION_OPEN_VALVE:
       if (currMilis - ignition_start_time < 3000) {
-        communication_module.send_valve_command(new ValveCommand(Open, ENGINE_VALVE)); // TODO: I think we should open this valve gradually, which implies a modification of the ValveComand structure.
+        communication_module.send_valve_command_to_OBEC(ValveCommand(Open, ENGINE_VALVE)); // TODO: I think we should open this valve gradually, which implies a modification of the ValveComand structure.
         // Value between 0 and 255 would look something like
         // (((currMilis - ignition_start_time) - 500) / 2500) * 255
-        // We might want to make this discrete by using lastMilis like we do in other states.
+        // We might want to make this discrete by using last_milis like we do in other states.
       } else {
         switch_to_state(IGNITION_IGNITERS_OFF);
       }
@@ -157,15 +161,15 @@ void loop()
 
 void switch_to_state(State newState)
 {
-  system_status.currentState = newState;
-  Logger::log("Switching to state: " + String(currentState));
-  storageModule.saveCurrentState(system_status.currentState);
-  switch (system_status.currentState)
+  system_status.current_state = newState;
+  Logger::log("Switching to state: " + String(system_status.current_state));
+  storage_module.saveCurrentState(system_status.current_state);
+  switch (system_status.current_state)
   {
     case STANDBY_PRESSURE_WARNING:
-      communication_module.send_valve_command_to_OBEC(new ValveCommand(Open, TANK_DEPRESS_VENT_VALVE));
+      communication_module.send_valve_command_to_OBEC(ValveCommand(Open, TANK_DEPRESS_VENT_VALVE));
       standby_pressure_warning_start_time = millis();
-      delay(1000) // TODO: Handle these delays without blocking the processor
+      delay(1000); // TODO: Handle these delays without blocking the processor
       break;
     case STANDBY_PRESSURE_WARNING_EXTERNAL_VENT:
       
@@ -173,19 +177,20 @@ void switch_to_state(State newState)
     case LOADING:
       if (system_status.loading_line_pressure_psi < MAX_LOADING_LINE_PRESSURE_PSI &&
             system_status.tank_pressure_psi < TANK_PRESSURE_WARN_PSI){
-        communication_module.send_valve_command_to_OBEC(new ValveCommand(Close, ENGINE_VALVE));
-        control_module.execute_valve_command(new ValveCommand(Close, LOADING_LINE_DEPRESS_VENT_VALVE));
-        communication_module.send_valve_command_to_OBEC(new ValveCommand(Open, TANK_DEPRESS_VENT_VALVE));
+        communication_module.send_valve_command_to_OBEC(ValveCommand(Close, ENGINE_VALVE));
+        control_module.execute_valve_command(ValveCommand(Close, LOADING_LINE_DEPRESS_VENT_VALVE));
+        communication_module.send_valve_command_to_OBEC(ValveCommand(Open, TANK_DEPRESS_VENT_VALVE));
         if (system_status.tank_depress_vent_temperature_celsius < TANK_DEPRESS_VENT_LOW_TEMP) {
           communication_module.send_tank_depress_vent_temp_low_to_MCC();
           switch_to_state(STANDBY);
         } else {
-          control_module.execute_valve_command(new ValveCommand(Open, LOADING_LINE_VALVE));
+          control_module.execute_valve_command(ValveCommand(Open, LOADING_VALVE));
         }
       }
       break;
-    case PREFLIGHT_CHECK:
-      PreflightCheckData preflight_check_data = new PreflightCheckData();
+    case PRE_FLIGHT_CHECK:
+    {
+      PreflightCheckData preflight_check_data = PreflightCheckData();
       preflight_check_data.tank_pressure_psi = system_status.tank_pressure_psi;
       preflight_check_data.tank_temperature_celsius = system_status.tank_temperature_celsius;
       preflight_check_data.engine_valve_open = system_status.engine_valve_open;
@@ -195,9 +200,9 @@ void switch_to_state(State newState)
       preflight_check_data.obec_battery_voltage_volt = system_status.obec_battery_voltage_volt;
       if (preflight_check_data.obec_battery_voltage_volt > OBEC_LOWEST_BATTERY_VOLTAGE) {
         preflight_check_data.lc_battery_voltage_volt = system_status.lc_battery_voltage_volt;
-        preflight_check_data.flight_computers_status = new FlightComputerStatus(true, true, true); // TODO: CHECK FLIGHT COMPUTERS STATUS
+        preflight_check_data.flight_computers_status = FlightComputersStatus(true, true, true); // TODO: CHECK FLIGHT COMPUTERS STATUS
         preflight_check_data.igniter_continuity_ok = system_status.igniter_continuity_ok;
-        preflight_check_data.weather_data = new WeatherData(weather_module.get_wind());  
+        preflight_check_data.weather_data = WeatherData(weather_module.get_wind_kt());  
       } else {
         control_module.set_obec_power(true);
       }
@@ -205,31 +210,32 @@ void switch_to_state(State newState)
       preflight_check_time = millis();
       switch_to_state(STANDBY);
       break;
+    }
     case PRE_LAUNCH_WIND_CHECK:
       if (millis() - preflight_check_time > 10000) {
         communication_module.send_stale_flight_check_to_MCC();
         switch_to_state(STANDBY);
       } else {
-        pre_launch_start_time = milllis();  
+        pre_launch_start_time = millis();  
       }
       break;
     case PRE_LAUNCH_UMBRILICAL_DISCONNECT:
       control_module.disconnect_umbrilical();
-      umbrilical_disconnect_time = milis();
+      umbrilical_disconnect_time = millis();
       break;
     case IGNITION_IGNITERS_ON:
       control_module.set_igniters_on(true);
-      ignition_start_time = milis();
+      ignition_start_time = millis();
       break;
     case IGNITION_IGNITERS_OFF:
       communication_module.send_ignition_confirmation_to_OBEC();
       communication_module.send_ignition_confirmation_to_MCC();
       break;
     case ABORT:
-      communication_module.send_valve_command_to_OBEC(new ValveCommand(Open, TANK_DEPRESS_VENT_VALVE));
-      control_module.execute_valve_command(new ValveCommand(Open, LOADING_LINE_DEPRESS_VENT_VALVE))
-      communication_module.send_valve_command_to_OBEC(new ValveCommand(Close, ENGINE_VALVE));
-      control_module.execute_valve_command(new ValveCommand(Close, LOADING_VALVE));
+      communication_module.send_valve_command_to_OBEC(ValveCommand(Open, TANK_DEPRESS_VENT_VALVE));
+      control_module.execute_valve_command(ValveCommand(Open, LOADING_LINE_DEPRESS_VENT_VALVE));
+      communication_module.send_valve_command_to_OBEC(ValveCommand(Close, ENGINE_VALVE));
+      control_module.execute_valve_command(ValveCommand(Close, LOADING_VALVE));
       control_module.set_igniters_on(false);
       communication_module.send_abort_signal_to_OBEC();
       break;
@@ -240,22 +246,22 @@ void switch_to_state(State newState)
 
 // Format is <state><tank_p><tank_t><tank_depress_vent_t><loading_line_p><obec_voltage><lc_voltage><sensor_data_byte><wind>
 // Example result (minus the spaces): STBY 0014 10.1 25.2 0014 4.12 4.20 ? 008
-string create_LC_status_packet_str(SystemStatus status)
+String create_LC_status_packet_str(SystemStatus status)
 {
   char buffer[10];
   Logger::debug("Creating telemetry packet...");
-  string state_str = get_state_string(status.current_state);
+  String state_str = get_state_string(status.current_state);
   sprintf(buffer, "%0*d", 4, status.tank_pressure_psi); // 4 is the desired number of digits (using leading zeroes)
-  string tank_pressure_str(buffer);
+  String tank_pressure_str(buffer);
   sprintf(buffer, "%.1f", status.tank_temperature_celsius);
-  string tank_temperature_str(buffer);
+  String tank_temperature_str(buffer);
   sprintf(buffer, "%0*d", 4, status.loading_line_pressure_psi); // 4 is the desired number of digits (using leading zeroes)
-  string loading_line_pressure_str(buffer); 
+  String loading_line_pressure_str(buffer); 
   sprintf(buffer, "%.12f", status.obec_battery_voltage_volt);
-  string obec_battery_voltage_str(buffer);
+  String obec_battery_voltage_str(buffer);
   sprintf(buffer, "%.12f", status.lc_battery_voltage_volt);
-  string lc_battery_voltage_str(buffer);
-  string status_flags_str = string(create_status_flags_byte(status.obec_connection_ok,
+  String lc_battery_voltage_str(buffer);
+  String status_flags_str = String(create_status_flags_byte(status.obec_connection_ok,
                                                             status.tank_depress_vent_valve_open,
                                                             status.engine_valve_open,
                                                             status.loading_valve_open,
@@ -263,8 +269,8 @@ string create_LC_status_packet_str(SystemStatus status)
                                                             status.hydraulic_umbrilical_connected,
                                                             status.igniter_continuity_ok), 1);
   
-  sprintf(buffer, "%0*d", 3, wind_kt); // 3 is the desired number of digits (using leading zeroes)
-  string wind_str(buffer);
+  sprintf(buffer, "%0*d", 3, status.wind_kt); // 3 is the desired number of digits (using leading zeroes)
+  String wind_str(buffer);
 
   return state_str +
           tank_pressure_str +
@@ -300,6 +306,6 @@ char create_status_flags_byte(bool obec_connection_ok,
     return result;
 }
 
-string get_state_string(State state) {
-  return "STBY" //TODO: Implement
+String get_state_string(State state) {
+  return "STBY"; //TODO: Implement
 }

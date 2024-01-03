@@ -1,22 +1,5 @@
-#include "Queue.h"
-#include <stdlib.h>
-#include <stdint.h>
-#include <XBee.h>
 
-#define STATE_IDLE 0
-#define STATE_WAITING_FOR_GROUND_RESPONSE 1
-#define STATE_WAITING_FOR_PAYLOAD_1_RESPONSE 2
-#define STATE_WAITING_FOR_PAYLOAD_2_RESPONSE 3
-
-#define SIMULATION_DISABLED 0
-#define SIMULATION_ENABLED 1
-#define SIMULATION_ACTIVATED 2
-
-#define PAYLOAD_MAX_PACKAGE_LENGTH 42
-
-#define PACKET_COUNT_EEPROM_ADDR 4
-
-class XBeeModule {
+class RS485Module {
   public:
     // uint16_t packetCount = 0;
 
@@ -47,31 +30,11 @@ class XBeeModule {
 
     // void loop();
 
-    ValveCommand check_for_commands(){
-      return ValveCommand(Open, ENGINE_VALVE);
+    OBECStatus check_for_status_message() {
+      return OBECStatus();
     }
 
-    void check_for_status_message() {
-
-    }
-
-    void send_system_status(SystemStatus system_status){
-
-    }
-
-    void send_preflight_check(PreflightCheckData data) {
-
-    }
-
-    void send_tank_depress_vent_tamp_low() {
-
-    }
-
-    void send_external_vent_as_default_prompt(){
-
-    }
-
-    void send_ignition_confirmation() {
+    void send_valve_command(ValveCommand command) {
 
     }
 };

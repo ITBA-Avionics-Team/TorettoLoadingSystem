@@ -1,9 +1,12 @@
-#include "Queue.h"
-#include "CommunicationModule.h"
 #include <stdlib.h>
 #include <stdint.h>
-#include <SoftwareSerial.h>
-#include <XBee.h>
+#ifndef TORETTOLIB_H
+#define TORETTOLIB_H
+#include "TorettoLib.h"
+#endif // TORETTOLIB_H
+
+#include "XbeeModule.h"
+#include "RS485Module.h"
 
 #define STATE_IDLE 0
 #define STATE_WAITING_FOR_GROUND_RESPONSE 1
@@ -17,29 +20,6 @@
 #define PAYLOAD_MAX_PACKAGE_LENGTH 42
 
 #define PACKET_COUNT_EEPROM_ADDR 4
-
-enum Valve {
-  TANK_DEPRESS_VENT_VALVE,
-  ENGINE_VALVE,
-  LOADING_VALVE,
-  LOADING_LINE_DEPRESS_VENT_VALVE
-}
-
-enum ValveAction {
-  Open,
-  Close
-}
-
-class ValveCommand {
-  public:
-    ValveAction action;
-    Valve valve;
-
-    ValveCommand(ValveAction actionVal, Valve valveVal) {
-      action = actionVal;
-      valve = valveVal;
-    }
-}
 
 class CommunicationModule {
   XBeeModule mcc_xbee;
@@ -79,15 +59,15 @@ class CommunicationModule {
     }
 
     void send_tank_depress_vent_temp_low_to_MCC() {
-      mcc_xbee.tank_depress_vent_tamp_low();
+      mcc_xbee.send_tank_depress_vent_tamp_low();
     }
 
     void send_external_vent_as_default_prompt_to_MCC() {
-      mcc_xbee.send_external_vent_as_default_prompt()
+      mcc_xbee.send_external_vent_as_default_prompt();
     }
 
     void send_ignition_confirmation_to_MCC() {
-      mcc_xbee.send_ignition_confirmation()
+      mcc_xbee.send_ignition_confirmation();
     }
 
     ValveCommand check_for_MCC_commands(){
@@ -95,7 +75,7 @@ class CommunicationModule {
       return command;
     }
 
-    void check_for_OBEC_status(){
+    OBECStatus check_for_OBEC_status(){
       OBECStatus status = obec_communication.check_for_status_message();
       return status;
     }
