@@ -241,7 +241,7 @@ void switch_to_state(State newState)
   }
 }
 
-// Format is <PACKET_COUNT>,<STATE>,<ALTITUDE>,<ACCELERATION>
+// Format is <state><tank_p><tank_t><tank_depress_vent_t><loading_line_p><obec_voltage><lc_voltage><sensor_data_byte><wind>
 // Example result (minus the spaces): STBY 0014 10.1 25.2 0014 4.12 4.20 ? 008
 string create_LC_status_packet_str(SystemStatus status)
 {
