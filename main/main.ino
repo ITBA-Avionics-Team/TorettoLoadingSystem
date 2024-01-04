@@ -2,12 +2,15 @@
 #define LOGGER_H
 #include "Logger.h"
 #endif // LOGGER_H
+#define SIMULATION_MODE true
+#define SIMULATED_COMMUNICATION_MODULE true
+
 #include "StorageModule.h"
 #include "ControlModule.h"
-#include "CommunicationModule.h"
 #include "SensorModule.h"
 #include "WeatherModule.h"
 #include "SystemStatus.h"
+
 #include <stdint.h>
 #include <string.h>
 
@@ -35,15 +38,19 @@ unsigned long ignition_start_time = 0;
 
 // Modules
 #ifdef SIMULATION_MODULE
+#include "SimulationModule.h"
 SimulationModule simulation_module = SimulationModule();
 #endif
 
 StorageModule storage_module = StorageModule();
 ControlModule control_module = ControlModule();
 SensorModule sensor_module = SensorModule();
+
 #ifdef SIMULATED_COMMUNICATION_MODULE
+#include "SimulatedCommunicationModule.h"
 SimulatedCommunicationModule communication_module = SimulatedCommunicationModule(simulation_module);
 #else
+#include "CommunicationModule.h"
 CommunicationModule communication_module = CommunicationModule();
 #endif
 
