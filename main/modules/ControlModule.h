@@ -9,7 +9,7 @@ class ControlModule {
   public:
 
     void execute_valve_command(Command command) {
-
+      Logger::debug("ControlModule.execute_valve_command" + String(command.valve));
     }
 
     void set_obec_power(bool on) {

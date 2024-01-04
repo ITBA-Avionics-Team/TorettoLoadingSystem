@@ -61,7 +61,7 @@ class CommunicationModule {
       new_OBEC_status_available = val;
     }
 
-    void send_valve_command_to_OBEC(Command command) {\
+    void send_valve_command_to_OBEC(Command command) {
       obec_communication.send_valve_command(command);
     }
 

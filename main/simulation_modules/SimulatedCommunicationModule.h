@@ -65,6 +65,7 @@ class SimulatedCommunicationModule {
     }
 
     void send_valve_command_to_OBEC(Command command) {
+      Logger::debug("Communication.send_valve_command_to_OBEC" + String(command.valve));
       obec_communication.send_valve_command(command);
     }
 
