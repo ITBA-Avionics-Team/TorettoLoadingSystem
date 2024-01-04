@@ -56,6 +56,10 @@ enum Valve {
   LOADING_LINE_DEPRESS_VENT_VALVE
 };
 
+bool is_LC_valve(Valve valve) {
+  return (valve == LOADING_VALVE || valve == LOADING_LINE_DEPRESS_VENT_VALVE);
+}
+
 // enum ValveAction {
 //   Open,
 //   Close

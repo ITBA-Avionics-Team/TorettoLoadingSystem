@@ -26,6 +26,7 @@ const float OBEC_LOWEST_BATTERY_VOLTAGE = 4;
 // System status variables
 SystemStatus system_status = SystemStatus();
 unsigned long last_milis = 0;
+unsigned long last_mcc_update_milis = 0;
 unsigned long preflight_check_time = 0;
 unsigned long standby_pressure_warning_start_time = 0;
 unsigned long pre_launch_start_time = 0;
@@ -57,22 +58,47 @@ void loop()
 {
   unsigned long currMilis = millis();
 
-  communication_module.check_for_MCC_commands();
-  communication_module.check_for_OBEC_status();
-  if (communication_module.new_MCC_command_available) {
-    Command command = communication_module.latest_MCC_command;
-    switch(command.type){
-      case ValveCommand:
-        break;
-      case SwitchStateCommand:
-        break;
-      case SetExternalVentAsDefaultCommand:
-        break;
+  if (currMilis - last_mcc_update_milis > 300) {
+    communication_module.check_for_MCC_commands();
+    communication_module.check_for_OBEC_status();
+  
+    if (communication_module.new_MCC_command_available) {
+      Command command = communication_module.latest_MCC_command;
+      switch(command.type){
+        case ValveCommand:
+          if (is_LC_valve(command.valve)){
+            control_module.execute_valve_command(command);
+          } else {
+            communication_module.send_valve_command_to_OBEC(command);
+          }
+          break;
+        case SwitchStateCommand:
+          switch_to_state(command.state);
+          break;
+        case SetExternalVentAsDefaultCommand:
+          system_status.external_vent_as_default = command.bool_value;
+          break;
+      }
+      communication_module.new_MCC_command_available = false;
     }
-  }
 
-  if (communication_module.new_OBEC_status_available) {
+    if (communication_module.new_OBEC_status_available) {
+      OBECStatus obec_status = communication_module.latest_OBEC_status;
+      system_status.tank_pressure_psi = obec_status.tank_pressure_psi;
+      system_status.tank_temperature_celsius = obec_status.tank_temperature_celsius;
+      system_status.tank_depress_vent_temperature_celsius = obec_status.tank_depress_vent_temperature_celsius;
+      system_status.obec_battery_voltage_volt = obec_status.obec_battery_voltage_volt;
+      system_status.tank_depress_vent_valve_open = obec_status.tank_depress_vent_valve_open;
+      system_status.engine_valve_open = obec_status.engine_valve_open;
+      
+      communication_module.new_OBEC_status_available = false;
+    }
 
+    update_sensor_and_weather_data();
+
+    communication_module.send_system_status_to_MCC(system_status);
+
+    last_mcc_update_milis = currMilis;
   }
 
   switch (system_status.current_state)
@@ -145,7 +171,7 @@ void loop()
     case PRE_LAUNCH_UMBRILICAL_DISCONNECT:
       if (currMilis - umbrilical_disconnect_time > 600)
       {
-        if (!sensor_module.umbrilical_connected()) {
+        if (!sensor_module.get_hydraulic_umbrilical_connected()) {
           communication_module.send_umbrilical_abort_to_MCC();
           break;
         }
@@ -326,4 +352,15 @@ char create_status_flags_byte(bool obec_connection_ok,
 
 String get_state_string(State state) {
   return "STBY"; //TODO: Implement
+}
+
+void update_sensor_and_weather_data() {
+  system_status.loading_line_pressure_psi = sensor_module.get_loading_line_pressure_psi();
+  system_status.lc_battery_voltage_volt = sensor_module.get_lc_battery_voltage_volt();
+  system_status.obec_connection_ok = sensor_module.get_obec_connection_ok();
+  system_status.loading_valve_open = sensor_module.get_loading_valve_open();
+  system_status.loading_depress_vent_valve_open = sensor_module.get_loading_depress_vent_valve_open();
+  system_status.hydraulic_umbrilical_connected = sensor_module.get_hydraulic_umbrilical_connected();
+  system_status.igniter_continuity_ok = sensor_module.get_igniter_continuity_ok();
+  system_status.wind_kt = weather_module.get_wind_kt();
 }
