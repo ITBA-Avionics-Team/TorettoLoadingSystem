@@ -34,10 +34,19 @@ unsigned long umbrilical_disconnect_time = 0;
 unsigned long ignition_start_time = 0;
 
 // Modules
+#ifdef SIMULATION_MODULE
+SimulationModule simulation_module = SimulationModule();
+#endif
+
 StorageModule storage_module = StorageModule();
 ControlModule control_module = ControlModule();
 SensorModule sensor_module = SensorModule();
+#ifdef SIMULATED_COMMUNICATION_MODULE
+SimulatedCommunicationModule communication_module = SimulatedCommunicationModule(simulation_module);
+#else
 CommunicationModule communication_module = CommunicationModule();
+#endif
+
 WeatherModule weather_module = WeatherModule();
 
 void setup()
