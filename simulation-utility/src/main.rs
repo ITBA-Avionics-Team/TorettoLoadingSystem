@@ -4,14 +4,16 @@ use std::{time::{Duration, self}, thread};
 // TODO: Create a command builder or simulation control class to build theses strings in a nicer manner
 const COMMUNICATION_MODULE_OBEC_STATUS_AVAILABLE_TRUE = "CM,3,1";
 const COMMUNICATION_MODULE_OBEC_STATUS_AVAILABLE_FALSE = "CM,3,0";
-const COMMUNICATION_MODULE_OBEC_STATUS_BASE = "CM,0,001410.125.24.12\0";
-const COMMUNICATION_MODULE_OBEC_STATUS_HIGH_PRESSURE = "CM,2,010910.125.24.12\0";
+const COMMUNICATION_MODULE_OBEC_STATUS_BASE = "CM,0,001414.125.24.12\0";
+const COMMUNICATION_MODULE_OBEC_STATUS_HIGH_PRESSURE = "CM,2,010914.125.24.12\0";
+const COMMUNICATION_MODULE_OBEC_STATUS_LOW_TANK_VENT_TEMPERATURE = "CM,2,010905.125.24.12\0";
 
 const COMMUNICATION_MODULE_MCC_COMMAND_AVAILABLE_TRUE = "CM,2,1";
 const COMMUNICATION_MODULE_MCC_COMMAND_AVAILABLE_FALSE = "CM,2,0";
 
 const COMMUNICATION_MODULE_MCC_COMMAND_EXT_VENT_AS_DEFAULT_FALSE = "CM,0,EV0";
 const COMMUNICATION_MODULE_MCC_COMMAND_EXT_VENT_AS_DEFAULT_TRUE = "CM,0,EV1";
+const COMMUNICATION_MODULE_MCC_COMMAND_SWITCH_STATE_LOADING = "CM,0,SSLDNG";
 
 fn main() {
     let write_port_name = "/dev/ttys003"; // Replace with the correct port
@@ -73,4 +75,18 @@ fn pressure_warning_ext_vent_and_back_to_standby_plus_ext_vent_as_default_check(
     write_port.write_all(&COMMUNICATION_MODULE_OBEC_STATUS_AVAILABLE_TRUE);
     
     write_port.close().expect("Failed to close write port");
+}
+
+fn loading_test(&mut write_port) {
+    write_port.write_all(&COMMUNICATION_MODULE_OBEC_STATUS_BASE);
+    write_port.write_all(&COMMUNICATION_MODULE_OBEC_STATUS_AVAILABLE_TRUE);
+    thread::sleep(time::Duration::from_millis(1000));
+    write_port.write_all(&COMMUNICATION_MODULE_MCC_COMMAND_SWITCH_STATE_LOADING);
+    write_port.write_all(&COMMUNICATION_MODULE_MCC_COMMAND_AVAILABLE_TRUE);
+    thread::sleep(time::Duration::from_millis(1000));
+    write_port.write_all(&COMMUNICATION_MODULE_OBEC_STATUS_LOW_TANK_VENT_TEMPERATURE);
+    write_port.write_all(&COMMUNICATION_MODULE_OBEC_STATUS_AVAILABLE_TRUE);
+    thread::sleep(time::Duration::from_millis(2000));
+    write_port.write_all(&COMMUNICATION_MODULE_MCC_COMMAND_SWITCH_STATE_LOADING);
+    write_port.write_all(&COMMUNICATION_MODULE_MCC_COMMAND_AVAILABLE_TRUE);
 }
