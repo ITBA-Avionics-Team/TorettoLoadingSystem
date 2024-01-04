@@ -5,10 +5,10 @@
 #define SIMULATION_MODE true
 #define SIMULATED_COMMUNICATION_MODULE true
 
-#include "StorageModule.h"
-#include "ControlModule.h"
-#include "SensorModule.h"
-#include "WeatherModule.h"
+#include "modules/StorageModule.h"
+#include "modules/ControlModule.h"
+#include "modules/SensorModule.h"
+#include "modules/WeatherModule.h"
 #include "SystemStatus.h"
 
 #include <stdint.h>
@@ -38,7 +38,7 @@ unsigned long ignition_start_time = 0;
 
 // Modules
 #ifdef SIMULATION_MODULE
-#include "SimulationModule.h"
+#include "simulation_modules/SimulationModule.h"
 SimulationModule simulation_module = SimulationModule();
 #endif
 
@@ -47,10 +47,10 @@ ControlModule control_module = ControlModule();
 SensorModule sensor_module = SensorModule();
 
 #ifdef SIMULATED_COMMUNICATION_MODULE
-#include "SimulatedCommunicationModule.h"
+#include "simulation_modules/SimulatedCommunicationModule.h"
 SimulatedCommunicationModule communication_module = SimulatedCommunicationModule(simulation_module);
 #else
-#include "CommunicationModule.h"
+#include "modules/CommunicationModule.h"
 CommunicationModule communication_module = CommunicationModule();
 #endif
 
