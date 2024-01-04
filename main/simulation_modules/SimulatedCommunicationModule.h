@@ -21,22 +21,50 @@
 
 #define PACKET_COUNT_EEPROM_ADDR 4
 
-class CommunicationModule {
+class SimulatedCommunicationModule {
   XBeeModule mcc_xbee;
   RS485Module obec_communication;
 
+  Command latest_MCC_command;
+  OBECStatus latest_OBEC_status;
+
+  bool new_MCC_command_available = false;
+  bool new_OBEC_status_available = false;
+
+  SimulationModule simulation_module;
+
   public:
-    Command latest_MCC_command;
-    OBECStatus latest_OBEC_status;
 
-    bool new_MCC_command_available = false;
-    bool new_OBEC_status_available = false;
-
-    CommunicationModule() {
+    CommunicationModule(SimulationModule simulation_module_val) {
       // latest_MCC_command = Command(SetExternalVentAsDefaultCommand, false);
+      simulation_module =simulation_module_val;
     }
 
-    void send_valve_command_to_OBEC(Command command) {\
+    Command get_latest_MCC_command() {
+
+    }
+
+    OBECStatus get_latest_OBEC_status() {
+      
+    }
+
+    bool get_new_MCC_command_available() {
+      return new_MCC_command_available;
+    }
+
+    void set_new_MCC_command_available(bool val) {
+      new_MCC_command_available = val;
+    }
+
+    bool get_new_OBEC_status_available() {
+      return new_OBEC_status_available;
+    }
+
+    void set_new_OBEC_status_available(bool val) {
+      new_OBEC_status_available = val;
+    }
+
+    void send_valve_command_to_OBEC(Command command) {
       obec_communication.send_valve_command(command);
     }
 

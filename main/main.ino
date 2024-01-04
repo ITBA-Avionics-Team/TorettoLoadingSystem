@@ -62,8 +62,8 @@ void loop()
     communication_module.check_for_MCC_commands();
     communication_module.check_for_OBEC_status();
   
-    if (communication_module.new_MCC_command_available) {
-      Command command = communication_module.latest_MCC_command;
+    if (communication_module.get_new_MCC_command_available()) {
+      Command command = communication_module.get_latest_MCC_command();
       switch(command.type){
         case ValveCommand:
           if (is_LC_valve(command.valve)){
@@ -79,11 +79,11 @@ void loop()
           system_status.external_vent_as_default = command.bool_value;
           break;
       }
-      communication_module.new_MCC_command_available = false;
+      communication_module.set_new_MCC_command_available(false);
     }
 
-    if (communication_module.new_OBEC_status_available) {
-      OBECStatus obec_status = communication_module.latest_OBEC_status;
+    if (communication_module.get_new_OBEC_status_available()) {
+      OBECStatus obec_status = communication_module.get_latest_OBEC_status();
       system_status.tank_pressure_psi = obec_status.tank_pressure_psi;
       system_status.tank_temperature_celsius = obec_status.tank_temperature_celsius;
       system_status.tank_depress_vent_temperature_celsius = obec_status.tank_depress_vent_temperature_celsius;
@@ -91,7 +91,7 @@ void loop()
       system_status.tank_depress_vent_valve_open = obec_status.tank_depress_vent_valve_open;
       system_status.engine_valve_open = obec_status.engine_valve_open;
       
-      communication_module.new_OBEC_status_available = false;
+      communication_module.set_new_OBEC_status_available(false);
     }
 
     update_sensor_and_weather_data();
