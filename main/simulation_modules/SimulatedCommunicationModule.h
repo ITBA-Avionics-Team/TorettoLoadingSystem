@@ -69,42 +69,47 @@ class SimulatedCommunicationModule {
     }
 
     void send_abort_signal_to_OBEC() {
-
+      Logger::debug("Communication.send_abort_signal_to_OBEC");
     }
 
     void send_ignition_confirmation_to_OBEC() {
-
+      Logger::debug("Communication.send_ignition_confirmation_to_OBEC");
     }
 
     void send_system_status_to_MCC(SystemStatus system_status) {
+      Logger::debug("Communication.send_system_status_to_MCC");
       mcc_xbee.send_system_status(system_status);
     }
 
     void send_preflight_check_data_to_MCC(PreflightCheckData data) {
+      Logger::debug("Communication.send_preflight_check_data_to_MCC");
       mcc_xbee.send_preflight_check(data);
     }
 
     void send_stale_flight_check_to_MCC() {
-
+      Logger::debug("Communication.send_stale_flight_check_to_MCC");
     }
 
     void send_wind_abort_to_MCC() {
-
+      Logger::debug("Communication.send_wind_abort_to_MCC");
     }
 
     void send_umbrilical_abort_to_MCC() {
-
+      Logger::debug("Communication.send_umbrilical_abort_to_MCC");
     }
 
     void send_tank_depress_vent_temp_low_to_MCC() {
+      Logger::debug("Communication.send_tank_depress_vent_temp_low_to_MCC");
       mcc_xbee.send_tank_depress_vent_tamp_low();
     }
 
     void send_external_vent_as_default_prompt_to_MCC() {
+      Logger::debug("Communication.send_external_vent_as_default_prompt_to_MCC");
       mcc_xbee.send_external_vent_as_default_prompt();
     }
 
     void send_ignition_confirmation_to_MCC() {
+      Logger::debug("Communication.send_ignition_confirmation_to_MCC");
       mcc_xbee.send_ignition_confirmation();
     }
 

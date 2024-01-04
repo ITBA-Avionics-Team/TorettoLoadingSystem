@@ -58,7 +58,7 @@ WeatherModule weather_module = WeatherModule();
 
 void setup()
 {
-  Serial.begin(9600);
+  Serial.begin(19200);
 
   storage_module.init();
   // sensor_module.init();

@@ -13,15 +13,15 @@ class ControlModule {
     }
 
     void set_obec_power(bool on) {
-
+      Logger::debug("Control.set_obec_power" + on);
     }
 
     void set_igniters_on(bool value) {
-
+      Logger::debug("Control.set_igniters_on" + value);
     }
     
     void disconnect_umbrilical() {
-
+      Logger::debug("Control.disconnect_umbrilical");
     }
 
 };
