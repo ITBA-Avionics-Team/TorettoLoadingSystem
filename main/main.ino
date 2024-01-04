@@ -65,6 +65,10 @@ void setup()
 
 void loop()
 {
+  #ifdef SIMULATED_COMMUNICATION_MODULE
+  simulation_module.loop();
+  #endif
+
   unsigned long currMilis = millis();
 
   if (currMilis - last_mcc_update_milis > 300) {

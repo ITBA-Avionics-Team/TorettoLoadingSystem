@@ -7,7 +7,28 @@ class SimulationModule {
     String weather_module_return_vals[1] = {""};
     String storage_module_return_vals[1] = {""};
 
-    // We should probable include parsing functions as a part of the SimulationModule (as static functions?)
+    void loop() {
+        if (Serial.available()) {
+            char buffer[50];
+            String module_id = Serial.readBytesUntil(',', &buffer, 10);
+            int function_id = Serial.parseInt();
+            String value = Seria.readString();
+            switch(module_id) {
+                case "CM":
+                    communication_module_return_vals[function_id] = value;
+                    break;
+                case "SE":
+                    sensor_module_return_vals[function_id] = value;
+                    break;
+                case "WE":
+                    weather_module_return_vals[function_id] = value;
+                    break;
+                case "ST":
+                    storage_module_return_vals[function_id] = value;
+                    break;
+            }
+        }
+    }
 
     static Command parse_command(String cmd_str) {
         return Command();
