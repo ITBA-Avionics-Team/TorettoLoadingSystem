@@ -18,7 +18,7 @@
 const int MAX_LOADING_LINE_PRESSURE_PSI = 100;
 const int TANK_PRESSURE_WARN_PSI = 100;
 const unsigned long MAX_PRESSURE_WARNING_TIME_MILLIS = 20000;
-const unsigned long MAX_PRESSURE_WARNING_TIME_EXT_VENT_MILLIS = 20000;
+const unsigned long MAX_PRESSURE_WARNING_TIME_EXT_VENT_MILLIS = 30000;
 const int MAX_LAUNCH_WIND_KT = 12;
 
 const float TANK_DEPRESS_VENT_LOW_TEMP = 10;
@@ -230,13 +230,15 @@ void switch_to_state(State newState)
   storage_module.saveCurrentState(system_status.current_state);
   switch (system_status.current_state)
   {
+    case STANDBY:
+      control_module.execute_valve_command(Command(ValveCommand, Close, LOADING_LINE_DEPRESS_VENT_VALVE));
+      communication_module.send_valve_command_to_OBEC(Command(ValveCommand, Close, TANK_DEPRESS_VENT_VALVE));
     case STANDBY_PRESSURE_WARNING:
       communication_module.send_valve_command_to_OBEC(Command(ValveCommand, Open, TANK_DEPRESS_VENT_VALVE));
       standby_pressure_warning_start_time = millis();
-      delay(1000); // TODO: Handle these delays without blocking the processor
       break;
     case STANDBY_PRESSURE_WARNING_EXTERNAL_VENT:
-      
+      control_module.execute_valve_command(Command(ValveCommand, Open, LOADING_LINE_DEPRESS_VENT_VALVE));
       break;
     case LOADING:
       if (system_status.loading_line_pressure_psi < MAX_LOADING_LINE_PRESSURE_PSI &&
