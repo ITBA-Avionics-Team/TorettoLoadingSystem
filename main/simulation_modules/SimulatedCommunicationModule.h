@@ -41,15 +41,15 @@ class SimulatedCommunicationModule {
     }
 
     Command get_latest_MCC_command() {
-
+      return SimulationModule.parse_command(simulation_module.communication_module_return_vals[0]);
     }
 
     OBECStatus get_latest_OBEC_status() {
-      
+      return SimulationModule.parse_OBEC_status(simulation_module.communication_module_return_vals[1]);
     }
 
     bool get_new_MCC_command_available() {
-      return new_MCC_command_available;
+      return return SimulationModule.parse_bool(simulation_module.communication_module_return_vals[2]);
     }
 
     void set_new_MCC_command_available(bool val) {
@@ -57,7 +57,7 @@ class SimulatedCommunicationModule {
     }
 
     bool get_new_OBEC_status_available() {
-      return new_OBEC_status_available;
+      return return SimulationModule.parse_bool(simulation_module.communication_module_return_vals[3]);
     }
 
     void set_new_OBEC_status_available(bool val) {
