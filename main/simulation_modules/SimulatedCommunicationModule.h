@@ -31,14 +31,11 @@ class SimulatedCommunicationModule {
   bool new_MCC_command_available = false;
   bool new_OBEC_status_available = false;
 
-  SimulationModule simulation_module;
+  SimulationModule& simulation_module;
 
   public:
 
-    SimulatedCommunicationModule(SimulationModule simulation_module_val) {
-      // latest_MCC_command = Command(SetExternalVentAsDefaultCommand, false);
-      simulation_module =simulation_module_val;
-    }
+    SimulatedCommunicationModule(SimulationModule& simulation_module): simulation_module(simulation_module){};
 
     Command get_latest_MCC_command() {
       return SimulationModule::parse_command(simulation_module.communication_module_return_vals[0]);
@@ -53,6 +50,7 @@ class SimulatedCommunicationModule {
     }
 
     void set_new_MCC_command_available(bool val) {
+      simulation_module.communication_module_return_vals[2] = SimulationModule::bool_to_str(val);
       new_MCC_command_available = val;
     }
 
@@ -61,6 +59,7 @@ class SimulatedCommunicationModule {
     }
 
     void set_new_OBEC_status_available(bool val) {
+      simulation_module.communication_module_return_vals[3] = SimulationModule::bool_to_str(val);
       new_OBEC_status_available = val;
     }
 
