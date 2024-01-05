@@ -30,21 +30,25 @@ fn main() {
     let mut reader = io::BufReader::new(write_port);
     let mut line = String::new();
 
-    loop {
-        let mut read_buf: Vec<u8> = vec![0; 400]; // Adjust the buffer size as needed
-        match reader.read_line(&mut line) {
-            Ok(bytes_read) => {
-                if bytes_read > 0 {
-                    println!("Received from Arduino: {}", line.trim());
-                    line.clear();
+    thread::spawn(move || {
+        println!("Spawned thread for reading serial port");
+        loop {
+            let mut read_buf: Vec<u8> = vec![0; 400]; // Adjust the buffer size as needed
+            match reader.read_line(&mut line) {
+                Ok(bytes_read) => {
+                    if bytes_read > 0 {
+                        println!("Received from Arduino: {}", line.trim());
+                        line.clear();
+                    }
                 }
+                Err(e) => eprintln!("Error reading from serial port: {}", e),
             }
-            Err(e) => eprintln!("Error reading from serial port: {}", e),
         }
-    }
+    });
 
+    loop {};
 
-
+    
 
     // pressure_abort(write_port);
 }
