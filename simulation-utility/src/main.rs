@@ -1,4 +1,4 @@
-use std::{time::{Duration, self}, thread, borrow::Borrow};
+use std::{time::{Duration, self}, thread, borrow::Borrow, io::{self, BufRead}};
 
 use serialport::SerialPort;
 
@@ -19,17 +19,34 @@ const COMMUNICATION_MODULE_MCC_COMMAND_SWITCH_STATE_LOADING: &[u8] = b"CM,0,SSLD
 
 fn main() {
     let write_port_name = "/dev/cu.usbserial-0001"; // Replace with the correct port
-    let baud_rate = 19200;
+    let baud_rate = 460800;
 
     // Open the write port
     let mut write_port = serialport::new(write_port_name, baud_rate)
-        .timeout(Duration::from_millis(10))
+        .timeout(Duration::from_millis(600))
         .open()
         .expect("Failed to open write port");
 
+    let mut reader = io::BufReader::new(write_port);
+    let mut line = String::new();
 
-    let buff: [u8; 28] = [b'0', b'0', b'1', b'4', b'1', b'0', b'.', b'1', b'2', b'5', b'.', b'2', b'0', b'0', b'1', b'4', b'4', b'.', b'1', b'2', b'4', b'.', b'2', b'0', b'?', b'0', b'0', b'8'];
-    pressure_abort(write_port);
+    loop {
+        let mut read_buf: Vec<u8> = vec![0; 400]; // Adjust the buffer size as needed
+        match reader.read_line(&mut line) {
+            Ok(bytes_read) => {
+                if bytes_read > 0 {
+                    println!("Received from Arduino: {}", line.trim());
+                    line.clear();
+                }
+            }
+            Err(e) => eprintln!("Error reading from serial port: {}", e),
+        }
+    }
+
+
+
+
+    // pressure_abort(write_port);
 }
 
 fn pressure_abort(mut write_port: Box<dyn SerialPort>) {
