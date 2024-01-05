@@ -1,4 +1,3 @@
-
 class SimulationModule {
 
     public:
@@ -7,25 +6,30 @@ class SimulationModule {
     String weather_module_return_vals[1] = {""};
     String storage_module_return_vals[1] = {""};
 
+    SimulationModule() {
+    
+    }
+
     void loop() {
         if (Serial.available()) {
             char buffer[50];
-            String module_id = Serial.readBytesUntil(',', &buffer, 10);
+            Serial.readBytesUntil(',', buffer, 10);
+            String module_id = String(buffer);
             int function_id = Serial.parseInt();
-            String value = Seria.readString();
-            switch(module_id) {
-                case "CM":
-                    communication_module_return_vals[function_id] = value;
-                    break;
-                case "SE":
-                    sensor_module_return_vals[function_id] = value;
-                    break;
-                case "WE":
-                    weather_module_return_vals[function_id] = value;
-                    break;
-                case "ST":
-                    storage_module_return_vals[function_id] = value;
-                    break;
+            String value = Serial.readString();
+            if (module_id.equals("CM")) {
+                communication_module_return_vals[function_id] = value;
+            }
+            else if(module_id.equals("SE")) {
+                sensor_module_return_vals[function_id] = value;
+            }
+            else if (module_id.equals("WE")) {
+                weather_module_return_vals[function_id] = value;
+            }
+            else if (module_id.equals("ST")) {
+                storage_module_return_vals[function_id] = value;
+            } else {
+                Logger::debug(String("No module recognized:") + String(module_id));
             }
         }
     }
@@ -39,11 +43,6 @@ class SimulationModule {
     }
 
     static bool parse_bool(String bool_str) {
-        return strbool_str.equals("1");
+        return bool_str.equals("1");
     }
-}
-
-// typedef struct SimulatedReturnVal {
-//     uint8_t function_id;
-//     String val_string;
-// }
+};

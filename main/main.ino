@@ -2,14 +2,13 @@
 #define LOGGER_H
 #include "Logger.h"
 #endif // LOGGER_H
-#define SIMULATION_MODE true
+#define SIMULATION_MODULE true
 #define SIMULATED_COMMUNICATION_MODULE true
 
 #include "modules/StorageModule.h"
 #include "modules/ControlModule.h"
 #include "modules/SensorModule.h"
 #include "modules/WeatherModule.h"
-#include "SystemStatus.h"
 
 #include <stdint.h>
 #include <string.h>

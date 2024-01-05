@@ -5,8 +5,8 @@
 #include "TorettoLib.h"
 #endif // TORETTOLIB_H
 
-#include "XbeeModule.h"
-#include "RS485Module.h"
+#include "modules/XbeeModule.h"
+#include "modules/RS485Module.h"
 
 #define STATE_IDLE 0
 #define STATE_WAITING_FOR_GROUND_RESPONSE 1

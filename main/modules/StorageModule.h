@@ -4,7 +4,7 @@
 #include <Preferences.h>
 #ifndef TORETTOLIB_H
 #define TORETTOLIB_H
-#include "TorettoLib.h"
+#include "../TorettoLib.h"
 #endif // TORETTOLIB_H
 
 #define CURRENT_STATE_KEY "curr_state"

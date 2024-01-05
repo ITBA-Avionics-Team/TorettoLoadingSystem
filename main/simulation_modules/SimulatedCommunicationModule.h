@@ -5,8 +5,8 @@
 #include "TorettoLib.h"
 #endif // TORETTOLIB_H
 
-#include "XbeeModule.h"
-#include "RS485Module.h"
+#include "../modules/XbeeModule.h"
+#include "../modules/RS485Module.h"
 
 #define STATE_IDLE 0
 #define STATE_WAITING_FOR_GROUND_RESPONSE 1
@@ -35,21 +35,21 @@ class SimulatedCommunicationModule {
 
   public:
 
-    CommunicationModule(SimulationModule simulation_module_val) {
+    SimulatedCommunicationModule(SimulationModule simulation_module_val) {
       // latest_MCC_command = Command(SetExternalVentAsDefaultCommand, false);
       simulation_module =simulation_module_val;
     }
 
     Command get_latest_MCC_command() {
-      return SimulationModule.parse_command(simulation_module.communication_module_return_vals[0]);
+      return SimulationModule::parse_command(simulation_module.communication_module_return_vals[0]);
     }
 
     OBECStatus get_latest_OBEC_status() {
-      return SimulationModule.parse_OBEC_status(simulation_module.communication_module_return_vals[1]);
+      return SimulationModule::parse_OBEC_status(simulation_module.communication_module_return_vals[1]);
     }
 
     bool get_new_MCC_command_available() {
-      return return SimulationModule.parse_bool(simulation_module.communication_module_return_vals[2]);
+      return SimulationModule::parse_bool(simulation_module.communication_module_return_vals[2]);
     }
 
     void set_new_MCC_command_available(bool val) {
@@ -57,7 +57,7 @@ class SimulatedCommunicationModule {
     }
 
     bool get_new_OBEC_status_available() {
-      return return SimulationModule.parse_bool(simulation_module.communication_module_return_vals[3]);
+      return SimulationModule::parse_bool(simulation_module.communication_module_return_vals[3]);
     }
 
     void set_new_OBEC_status_available(bool val) {
