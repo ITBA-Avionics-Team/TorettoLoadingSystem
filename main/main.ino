@@ -299,6 +299,7 @@ String create_LC_status_packet_str(SystemStatus status)
   String tank_pressure_str(buffer);
   sprintf(buffer, "%.1f", status.tank_temperature_celsius);
   String tank_temperature_str(buffer);
+  // TODO: Missing tank depress vent temperature
   sprintf(buffer, "%0*d", 4, status.loading_line_pressure_psi); // 4 is the desired number of digits (using leading zeroes)
   String loading_line_pressure_str(buffer); 
   sprintf(buffer, "%.12f", status.obec_battery_voltage_volt);
