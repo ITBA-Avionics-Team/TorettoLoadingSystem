@@ -18,13 +18,17 @@ class SimulationModule {
                 Logger::error("[SimModule] Message received with module_id of different length than 2 chars.");
             }
             String module_id = String(buffer).substring(0, module_id_len);
+            // Logger::error("ModuleIdLen - " + String(module_id_len));
 
             int function_id_len = Serial.readBytesUntil(',', buffer, 10);
             int function_id = String(buffer).substring(0, function_id_len).toInt();
-            String value = Serial.readString();
+            
+            int value_len = Serial.readBytesUntil('|', buffer, 30);
+            String value = String(buffer).substring(0, value_len);
+            
             // TODO: Check if the value has a newline at the end and send a warning, or strip it.
             if (module_id.equals("CM")) {
-                // Logger::debug("[SM]Received CM data for functionId " + String(function_id) + String(" - ") + value);
+                Logger::debug("[SM]Received CM data fID" + String(function_id) + String("-") + value);
                 communication_module_return_vals[function_id] = value;
             }
             else if(module_id.equals("SE")) {
