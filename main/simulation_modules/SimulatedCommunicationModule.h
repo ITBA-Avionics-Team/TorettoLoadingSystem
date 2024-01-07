@@ -42,6 +42,7 @@ class SimulatedCommunicationModule {
     }
 
     OBECStatus get_latest_OBEC_status() {
+      Logger::log("[CM] get_latest_OBEC_status()" + simulation_module.communication_module_return_vals[1]);
       return SimulationModule::parse_OBEC_status(simulation_module.communication_module_return_vals[1]);
     }
 
@@ -55,6 +56,7 @@ class SimulatedCommunicationModule {
     }
 
     bool get_new_OBEC_status_available() {
+      // Logger::log("[CM] get_new_OBEC_status_available()" + String(SimulationModule::parse_bool(simulation_module.communication_module_return_vals[3])));
       return SimulationModule::parse_bool(simulation_module.communication_module_return_vals[3]);
     }
 
@@ -77,7 +79,7 @@ class SimulatedCommunicationModule {
     }
 
     void send_system_status_to_MCC(SystemStatus system_status) {
-      Logger::debug("Communication.send_system_status_to_MCC");
+      // Logger::debug("Communication.send_system_status_to_MCC");
       mcc_xbee.send_system_status(system_status);
     }
 

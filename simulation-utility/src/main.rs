@@ -23,7 +23,7 @@ fn main() {
 
     // Open the write port
     let mut serial_port = serialport::new(serial_port_name, baud_rate)
-        .timeout(Duration::from_millis(600))
+        .timeout(Duration::from_millis(1000))
         .open()
         .expect("Failed to open write port");
 
@@ -48,7 +48,7 @@ fn main() {
                 },
             }
             drop(port);
-            thread::sleep(time::Duration::from_millis(500));        
+            thread::sleep(time::Duration::from_millis(50));        
         }
     });
 
@@ -61,13 +61,35 @@ fn main() {
 
 fn pressure_abort(mut serial_port_mutex: Arc<Mutex<Box<dyn SerialPort>>>) {
     let mut serial_port = serial_port_mutex.lock().unwrap();
-    serial_port.write_all(&COMMUNICATION_MODULE_OBEC_STATUS_BASE);
-    println!("Wrote to serial port once");
+    serial_port.write_all(COMMUNICATION_MODULE_OBEC_STATUS_BASE);
+    println!("Wrote base OBEC Status to serial port.");
     drop(serial_port);
     thread::sleep(time::Duration::from_millis(1000));
+    let mut serial_port = serial_port_mutex.lock().unwrap();
+    serial_port.write_all(COMMUNICATION_MODULE_OBEC_STATUS_AVAILABLE_TRUE);
+    println!("Wrote \"OBEC Status available\" signal to serial port.");
+    drop(serial_port);
+    thread::sleep(time::Duration::from_millis(5000));
+
+    let mut serial_port = serial_port_mutex.lock().unwrap();
+    serial_port.write_all(COMMUNICATION_MODULE_OBEC_STATUS_BASE);
+    println!("Wrote base OBEC Status to serial port.");
+    drop(serial_port);
+    thread::sleep(time::Duration::from_millis(1000));
+    let mut serial_port = serial_port_mutex.lock().unwrap();
+    serial_port.write_all(COMMUNICATION_MODULE_OBEC_STATUS_AVAILABLE_TRUE);
+    println!("Wrote \"OBEC Status available\" signal to serial port.");
+    drop(serial_port);
+    thread::sleep(time::Duration::from_millis(5000));
+
     serial_port = serial_port_mutex.lock().unwrap();
-    serial_port.write_all(&COMMUNICATION_MODULE_OBEC_STATUS_HIGH_PRESSURE);
-    println!("Wrote to serial port again!");
+    serial_port.write_all(COMMUNICATION_MODULE_OBEC_STATUS_HIGH_PRESSURE);
+    println!("Wrote high tank pressure OBEC Status to serial port.");
+    drop(serial_port);
+    thread::sleep(time::Duration::from_millis(1000));
+    let mut serial_port = serial_port_mutex.lock().unwrap();
+    serial_port.write_all(COMMUNICATION_MODULE_OBEC_STATUS_AVAILABLE_TRUE);
+    println!("Wrote \"OBEC Status available\" signal to serial port.");
     drop(serial_port);
 }
 
