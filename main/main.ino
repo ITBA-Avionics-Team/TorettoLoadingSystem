@@ -2,6 +2,12 @@
 #define LOGGER_H
 #include "Logger.h"
 #endif // LOGGER_H
+
+#ifndef OLED_H
+#define OLED_H
+#include "OLEDModule.h"
+#endif // OLED_H
+
 #define SIMULATION_MODULE true
 #define SIMULATED_COMMUNICATION_MODULE true
 
@@ -57,7 +63,9 @@ WeatherModule weather_module = WeatherModule();
 
 void setup()
 {
-  Serial.begin(19200);
+  Serial.begin(115200);
+
+  OLEDModule::init();
 
   storage_module.init();
   // sensor_module.init();
