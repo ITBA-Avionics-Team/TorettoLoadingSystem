@@ -4,22 +4,22 @@ use serialport::SerialPort;
 
 
 // TODO: Create a command builder or simulation control class to build theses strings in a nicer manner
-const COMMUNICATION_MODULE_OBEC_STATUS_AVAILABLE_TRUE: &[u8] = b"CM,3,1";
-const COMMUNICATION_MODULE_OBEC_STATUS_AVAILABLE_FALSE: &[u8] = b"CM,3,0";
-const COMMUNICATION_MODULE_OBEC_STATUS_BASE: &[u8] = b"CM,0,001414.125.24.12\0";
-const COMMUNICATION_MODULE_OBEC_STATUS_HIGH_PRESSURE: &[u8] = b"CM,2,010914.125.24.12\0";
-const COMMUNICATION_MODULE_OBEC_STATUS_LOW_TANK_VENT_TEMPERATURE: &[u8] = b"CM,2,010905.125.24.12\0";
+const COMMUNICATION_MODULE_OBEC_STATUS_AVAILABLE_TRUE: &[u8] = b"CM,3,1|";
+const COMMUNICATION_MODULE_OBEC_STATUS_AVAILABLE_FALSE: &[u8] = b"CM,3,0|";
+const COMMUNICATION_MODULE_OBEC_STATUS_BASE: &[u8] = b"CM,0,001414.125.24.12)|";
+const COMMUNICATION_MODULE_OBEC_STATUS_HIGH_PRESSURE: &[u8] = b"CM,2,010914.125.24.12)|";
+const COMMUNICATION_MODULE_OBEC_STATUS_LOW_TANK_VENT_TEMPERATURE: &[u8] = b"CM,2,010905.125.24.12)|";
 
-const COMMUNICATION_MODULE_MCC_COMMAND_AVAILABLE_TRUE: &[u8] = b"CM,2,1";
-const COMMUNICATION_MODULE_MCC_COMMAND_AVAILABLE_FALSE: &[u8] = b"CM,2,0";
+const COMMUNICATION_MODULE_MCC_COMMAND_AVAILABLE_TRUE: &[u8] = b"CM,2,1|";
+const COMMUNICATION_MODULE_MCC_COMMAND_AVAILABLE_FALSE: &[u8] = b"CM,2,0|";
 
-const COMMUNICATION_MODULE_MCC_COMMAND_EXT_VENT_AS_DEFAULT_FALSE: &[u8] = b"CM,0,EV0";
-const COMMUNICATION_MODULE_MCC_COMMAND_EXT_VENT_AS_DEFAULT_TRUE: &[u8] = b"CM,0,EV1";
-const COMMUNICATION_MODULE_MCC_COMMAND_SWITCH_STATE_LOADING: &[u8] = b"CM,0,SSLDNG";
+const COMMUNICATION_MODULE_MCC_COMMAND_EXT_VENT_AS_DEFAULT_FALSE: &[u8] = b"CM,0,EV0|";
+const COMMUNICATION_MODULE_MCC_COMMAND_EXT_VENT_AS_DEFAULT_TRUE: &[u8] = b"CM,0,EV1|";
+const COMMUNICATION_MODULE_MCC_COMMAND_SWITCH_STATE_LOADING: &[u8] = b"CM,0,SSLDNG|";
 
 fn main() {
     let serial_port_name = "/dev/cu.usbserial-0001"; // Replace with the correct port
-    let baud_rate = 460800;
+    let baud_rate = 115200;
 
     // Open the write port
     let mut serial_port = serialport::new(serial_port_name, baud_rate)
@@ -43,7 +43,9 @@ fn main() {
                         line.clear();
                     }
                 }
-                Err(e) => eprintln!("Error reading from serial port: {}", e),
+                Err(e) => {
+                    // eprintln!("Error reading from serial port: {}", e)
+                },
             }
             drop(port);
             thread::sleep(time::Duration::from_millis(500));        
