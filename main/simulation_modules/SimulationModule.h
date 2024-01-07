@@ -13,13 +13,18 @@ class SimulationModule {
     void loop() {
         if (Serial.available()) {
             char buffer[50];
-            Serial.readBytesUntil(',', buffer, 10);
-            String module_id = String(buffer).substring(0, 2);
-            int function_id = Serial.parseInt();
-            Serial.read(); // Read the comma to discard it
+            int module_id_len = Serial.readBytesUntil(',', buffer, 10);
+            if (module_id_len != 2){
+                Logger::error("[SimModule] Message received with module_id of different length than 2 chars.");
+            }
+            String module_id = String(buffer).substring(0, module_id_len);
+
+            int function_id_len = Serial.readBytesUntil(',', buffer, 10);
+            int function_id = String(buffer).substring(0, function_id_len).toInt();
             String value = Serial.readString();
             // TODO: Check if the value has a newline at the end and send a warning, or strip it.
             if (module_id.equals("CM")) {
+                // Logger::debug("[SM]Received CM data for functionId " + String(function_id) + String(" - ") + value);
                 communication_module_return_vals[function_id] = value;
             }
             else if(module_id.equals("SE")) {
@@ -47,7 +52,8 @@ class SimulationModule {
     }
 
     static OBECStatus parse_OBEC_status(String status_str) {
-        return OBECStatus();
+        Logger::debug("Parsing obec status..." + status_str);
+        return OBECStatus::from_message(status_str);
     }
 
     static bool parse_bool(String bool_str) {

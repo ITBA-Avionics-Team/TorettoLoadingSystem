@@ -45,8 +45,36 @@ class OBECStatus {
   float obec_battery_voltage_volt;
   bool tank_depress_vent_valve_open;
   bool engine_valve_open;
-};
 
+  OBECStatus(){}
+
+  OBECStatus(int tank_pressure_psi_val,
+              float tank_temperature_celsius_val,
+              float tank_depress_vent_temperature_celsius_val,
+              float obec_battery_voltage_volt_val,
+              bool tank_depress_vent_valve_open_val,
+              bool engine_valve_open_val){
+    tank_pressure_psi = tank_pressure_psi_val;
+    tank_temperature_celsius = tank_temperature_celsius_val;
+    tank_depress_vent_temperature_celsius = tank_depress_vent_temperature_celsius_val;
+    obec_battery_voltage_volt = obec_battery_voltage_volt_val;
+    tank_depress_vent_valve_open = tank_depress_vent_valve_open_val;
+    engine_valve_open = engine_valve_open_val;
+  }
+
+  static OBECStatus from_message(String message) {
+    char sensor_data_byte = message.charAt(16);
+    OBECStatus result = OBECStatus(
+      message.substring(0,4).toInt(),
+      message.substring(4, 8).toFloat(),
+      message.substring(8, 12).toFloat(),
+      message.substring(12, 16).toFloat(),
+      sensor_data_byte & 0b01,
+      sensor_data_byte & 0b10
+    );
+    return result;
+  }
+};
 
 // ValveControl.h
 enum Valve {
