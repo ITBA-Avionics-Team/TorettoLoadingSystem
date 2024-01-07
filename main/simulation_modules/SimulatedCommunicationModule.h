@@ -42,7 +42,7 @@ class SimulatedCommunicationModule {
     }
 
     OBECStatus get_latest_OBEC_status() {
-      Logger::log("[CM] get_latest_OBEC_status()" + simulation_module.communication_module_return_vals[1]);
+      Logger::debug("[CM] get_latest_OBEC_status()" + simulation_module.communication_module_return_vals[1]);
       return SimulationModule::parse_OBEC_status(simulation_module.communication_module_return_vals[1]);
     }
 

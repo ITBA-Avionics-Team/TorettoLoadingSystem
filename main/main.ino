@@ -75,7 +75,8 @@ void setup()
 
   last_milis = millis();
 
-  switch_to_state(storage_module.load_current_state(STANDBY));
+  // switch_to_state(storage_module.load_current_state(STANDBY));
+  switch_to_state(STANDBY);
 }
 
 void loop() {
@@ -115,10 +116,11 @@ void loop() {
     }
 
     if (communication_module.get_new_OBEC_status_available()) {
-      Logger::log("[Main]new OBEC status available");
+      // Logger::log("[Main]new OBEC status available");
       OBECStatus obec_status = communication_module.get_latest_OBEC_status();
-      Logger::log("[Main]got latest OBEC status");
+      // Logger::log("[Main]got latest OBEC status");
       system_status.tank_pressure_psi = obec_status.tank_pressure_psi;
+      // Logger::log(system_status.tank_pressure_psi);
       system_status.tank_temperature_celsius = obec_status.tank_temperature_celsius;
       system_status.tank_depress_vent_temperature_celsius = obec_status.tank_depress_vent_temperature_celsius;
       system_status.obec_battery_voltage_volt = obec_status.obec_battery_voltage_volt;
@@ -232,7 +234,7 @@ void loop() {
 
 void switch_to_state(State newState) {
   system_status.current_state = newState;
-  Logger::log("Switching to state: " + String(system_status.current_state));
+  Logger::log("Switching to state: " + get_state_string(system_status.current_state));
   storage_module.saveCurrentState(system_status.current_state);
   switch (system_status.current_state) {
     case STANDBY:
@@ -370,7 +372,32 @@ char create_status_flags_byte(bool obec_connection_ok,
 }
 
 String get_state_string(State state) {
-  return "STBY";  //TODO: Implement
+
+  switch (state)
+  {
+  case STANDBY:
+    return "STANDBY";
+  case STANDBY_PRESSURE_WARNING:
+    return "STANDBY_PRESSURE_WARNING";
+  case STANDBY_PRESSURE_WARNING_EXTERNAL_VENT:
+    return "STANDBY_PRESSURE_WARNING_EXTERNAL_VENT";
+  case LOADING:
+    return "LOADING";
+  case PRE_FLIGHT_CHECK:
+    return "PRE_FLIGHT_CHECK";
+  case PRE_LAUNCH_WIND_CHECK:
+    return "PRE_LAUNCH_WIND_CHECK";
+  case PRE_LAUNCH_UMBRILICAL_DISCONNECT:
+    return "PRE_LAUNCH_UMBRILICAL_DISCONNECT";
+  case IGNITION_IGNITERS_ON:
+    return "IGNITION_IGNITERS_ON";
+  case IGNITION_OPEN_VALVE:
+    return "IGNITION_OPEN_VALVE";
+  case IGNITION_IGNITERS_OFF:
+    return "IGNITION_IGNITERS_OFF";
+  case ABORT:
+    return "ABORT";
+  }
 }
 
 void update_sensor_and_weather_data() {

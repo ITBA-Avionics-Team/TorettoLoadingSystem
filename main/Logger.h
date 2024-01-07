@@ -5,8 +5,8 @@
 #include <stdint.h>
 
 class Logger {
-  static const bool debugActivated = true;
-  static const bool errorActivated = true;
+  static const bool debugActivated = false;
+  static const bool errorActivated = false;
 
   public:
     static void error(float value) {
