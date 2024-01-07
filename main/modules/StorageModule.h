@@ -4,7 +4,7 @@
 #include <Preferences.h>
 #ifndef TORETTOLIB_H
 #define TORETTOLIB_H
-#include "TorettoLib.h"
+#include "../TorettoLib.h"
 #endif // TORETTOLIB_H
 
 #define CURRENT_STATE_KEY "curr_state"
@@ -25,18 +25,18 @@ class StorageModule {
     }
 
     State load_current_state(State defaultState) {
-      return STANDBY; //TODO: Implement
-      // uint8_t savedState = preferences.getUChar(CURRENT_STATE_KEY, 255); // 255 is the default value returned if no saved state is found
-      // if (savedState == 255) {
-      //   Logger::debug("No previous state found in memory, defaulting to " + String(defaultState));
-      //   return defaultState;
-      // } else {
-      //   Logger::debug("Found previous state in memory: " + String(savedState));
-      //   return savedState;
-      // }
+      // return STANDBY; //TODO: Implement
+      State savedState = (State)preferences.getUChar(CURRENT_STATE_KEY, 255); // 255 is the default value returned if no saved state is found
+      if (savedState == 255) {
+        Logger::debug("No previous state found in memory, defaulting to " + String(defaultState));
+        return defaultState;
+      } else {
+        Logger::debug("Found previous state in memory: " + String(savedState));
+        return savedState;
+      }
     }
 
-    void saveCurrentState(uint8_t currentState) {
+    void saveCurrentState(State currentState) {
       preferences.putUChar(CURRENT_STATE_KEY, currentState);
       Logger::debug("Saved current state:" + String(currentState));
     }
