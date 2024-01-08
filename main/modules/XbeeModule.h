@@ -48,7 +48,7 @@ class XBeeModule {
     // void loop();
 
     Command check_for_commands(){
-      return Command(ValveCommand, Open, ENGINE_VALVE);
+      return Command(EMPTY);
     }
 
     void check_for_status_message() {
@@ -64,6 +64,14 @@ class XBeeModule {
     }
 
     void send_tank_depress_vent_tamp_low() {
+
+    }
+
+    void send_wind_abort() {
+      
+    }
+
+    void send_umbrilical_abort() {
 
     }
 

@@ -1,40 +1,28 @@
+#define RS485_SET_TX_PIN 2;
 
 class RS485Module {
+  HardwareSerial serial = HardwareSerial(2);;
+  char serial_buffer[30];
   public:
-    // uint16_t packetCount = 0;
-
-    // XBee mccXBee = XBee();;
-    // ZBRxResponse mccResponseObj = ZBRxResponse();
-    // ZBTxRequest mccRequestObj;
-    // ZBTxStatusResponse mccRequestStatusObj = ZBTxStatusResponse();
-
-    // CommandQueue obecCommandQueue = CommandQueue();
-    // uint8_t latestPayload1Packet[PAYLOAD_MAX_PACKAGE_LENGTH];
-
-    // void XbeeModule::init(Stream& groundXBeeSerial);
-
-    // void setRtcTimeFromPacket(uint8_t* packetData, uint8_t packetLength);
-    // void parseReceivedPacket(uint8_t* packetData, uint8_t packetLength);
-    // void parseCommandPacket(uint8_t* packetData, uint8_t packetLength);
-    // void parseTelemetryPacket(uint8_t* packetData, uint8_t packetLength);
-
-    // void sendNextPayload1Command();
-    // void sendNextPayload2Command();
-    // void sendNextTelemetryPacket();
-
-    // void get_xbee_data() {
-      
-    // }
-  
-    // void managePayloadsCommunication();
-
-    // void loop();
+    RS485Module() {
+      serial.begin(9600, SERIAL_8N1, 13, -1);
+      pinMode(RS485_SET_TX_PIN, OUTPUT);
+    }
 
     OBECStatus check_for_status_message() {
-      return OBECStatus();
+      if (serial.available()) {
+            int message_len = serial.readBytesUntil('|', serial_buffer, 30);
+            String message = String(serial_buffer).substring(0, message_len);
+            return OBECStatus::from_message(message);
+      }
+      return OBECStatus(-1, -1, -1, -1, false, false);
     }
 
     void send_valve_command(Command command) {
-
+      digitalWrite(RS485_SET_TX_PIN, HIGH); // We set ourselves as the transmitter 
+      String command_msg = Command::to_message(command);
+      serial.print(command_msg);
+      digitalWrite(RS485_SET_TX_PIN, LOW); // We set ourselves as the transmitter 
     }
 };
+

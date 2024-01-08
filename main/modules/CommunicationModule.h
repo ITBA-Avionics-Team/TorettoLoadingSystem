@@ -89,10 +89,12 @@ class CommunicationModule {
 
     void send_wind_abort_to_MCC() {
       Logger::debug("Communication.send_wind_abort_to_MCC");
+      mcc_xbee.send_wind_abort();
     }
 
     void send_umbrilical_abort_to_MCC() {
       Logger::debug("Communication.send_umbrilical_abort_to_MCC");
+      mcc_xbee.send_umbrilical_abort();
     }
 
     void send_tank_depress_vent_temp_low_to_MCC() {
@@ -112,11 +114,17 @@ class CommunicationModule {
 
     void check_for_MCC_commands(){
       Command command = mcc_xbee.check_for_commands();
-      // return command;
+      if (!Command::is_empty(command)) {
+        latest_MCC_command = command;
+        new_MCC_command_available = true;
+      }
     }
 
     void check_for_OBEC_status(){
       OBECStatus status = obec_communication.check_for_status_message();
-      // return status;
+      if (!OBECStatus::is_empty(status)) {
+        latest_OBEC_status = status;
+        new_OBEC_status_available = true;
+      }
     }
 };
