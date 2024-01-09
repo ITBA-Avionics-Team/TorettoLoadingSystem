@@ -51,47 +51,6 @@ void loop()
 
 }
 
-// Format is <tank_p><tank_t><tank_depress_vent_t><obec_voltage><sensor_data_byte>
-// Example result (minus the spaces): 0014 10.1 25.2 4.12 ?
-String create_OBEC_status_packet_str(OBECStatus status)
-{
-  char buffer[10];
-  Logger::debug("Creating telemetry packet...");
-  String state_str = get_state_string(status.current_state);
-  sprintf(buffer, "%0*d", 4, status.tank_pressure_psi); // 4 is the desired number of digits (using leading zeroes)
-  String tank_pressure_str(buffer);
-  sprintf(buffer, "%.1f", status.tank_temperature_celsius);
-  String tank_temperature_str(buffer);
-  sprintf(buffer, "%.1f", status.tank_depress_vent_temperature_celsius);
-  String tank_depress_vent_temperature_str(buffer);
-  sprintf(buffer, "%.12f", status.obec_battery_voltage_volt);
-  String obec_battery_voltage_str(buffer);
-  String status_flags_str = String(create_status_flags_byte(status.tank_depress_vent_valve_open,
-                                                            status.engine_valve_open), 1);
-
-  sprintf(buffer, "%0*d", 3, status.wind_kt); // 3 is the desired number of digits (using leading zeroes)
-  String wind_str(buffer);
-
-  return tank_pressure_str +
-          tank_temperature_str +
-          tank_depress_vent_temperarture_str +
-          obec_battery_voltage_str +
-          status_flags_str;
-}
-
-char create_status_flags_byte(bool tank_depress_vent_valve_open,
-                              bool engine_valve_open) {
-    char result = 0;
-    if (tank_depress_vent_valve_open) result++;
-    result<<1;
-    if (engine_valve_open) result++;
-    return result;
-}
-
-String get_state_string(State state) {
-  return "STBY"; //TODO: Implement
-}
-
 void update_sensor_data() {
   system_status.tank_pressure_psi = sensor_module.get_tank_pressure_psi();
   system_status.tank_temperature_celsius = sensor_module.get_tank_temperature_celsius();

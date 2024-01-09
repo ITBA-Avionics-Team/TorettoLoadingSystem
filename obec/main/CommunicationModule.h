@@ -46,6 +46,9 @@ class CommunicationModule {
 
     void check_for_LC_commands(){
       Command command = lc_communication.check_for_commands();
-      // return command;
+      if (!Command::is_empty(command)) {
+        latest_LC_command = command;
+        new_LC_command_available = true;
+      }
     }
 };
