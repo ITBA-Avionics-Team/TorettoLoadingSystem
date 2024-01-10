@@ -49,38 +49,38 @@ String get_4_byte_string_from_state(State state)
 State get_state_from_4_byte_string(String state_str)
 {
 
-  if (state_str.equals("STBY") {
-    return STANDBY:
+  if (state_str.equals("STBY")) {
+    return STANDBY;
   } 
-  else if (state_str.equals("STPW") {
-    return STANDBY_PRESSURE_WARNING:
+  else if (state_str.equals("STPW")) {
+    return STANDBY_PRESSURE_WARNING;
   } 
-  else if (state_str.equals("STPE") {
-    return STANDBY_PRESSURE_WARNING_EXTERNAL_VENT:
+  else if (state_str.equals("STPE")) {
+    return STANDBY_PRESSURE_WARNING_EXTERNAL_VENT;
   } 
-  else if (state_str.equals("LDNG") {
-    return LOADING:
+  else if (state_str.equals("LDNG")) {
+    return LOADING;
   } 
-  else if (state_str.equals("PRFC") {
-    return PRE_FLIGHT_CHECK:
+  else if (state_str.equals("PRFC")) {
+    return PRE_FLIGHT_CHECK;
   } 
-  else if (state_str.equals("PRLW") {
-    return PRE_LAUNCH_WIND_CHECK:
+  else if (state_str.equals("PRLW")) {
+    return PRE_LAUNCH_WIND_CHECK;
   } 
-  else if (state_str.equals("PRLU") {
-    return PRE_LAUNCH_UMBRILICAL_DISCONNECT:
+  else if (state_str.equals("PRLU")) {
+    return PRE_LAUNCH_UMBRILICAL_DISCONNECT;
   } 
-  else if (state_str.equals("IGON") {
-    return IGNITION_IGNITERS_ON:
+  else if (state_str.equals("IGON")) {
+    return IGNITION_IGNITERS_ON;
   } 
-  else if (state_str.equals("IGVO") {
-    return IGNITION_OPEN_VALVE:
+  else if (state_str.equals("IGVO")) {
+    return IGNITION_OPEN_VALVE;
   } 
-  else if (state_str.equals("IGOF") {
-    return IGNITION_IGNITERS_OFF:
+  else if (state_str.equals("IGOF")) {
+    return IGNITION_IGNITERS_OFF;
   } 
-  else if (state_str.equals("ABRT") {
-    return ABORT:
+  else if (state_str.equals("ABRT")) {
+    return ABORT;
   }
 }
 
@@ -172,7 +172,7 @@ public:
   {
     char buffer[10];
     Logger::debug("Creating SystemStatus message...");
-    String state_str = get_state_4_byte_string(status.current_state);
+    String state_str = get_4_byte_string_from_state(status.current_state);
     sprintf(buffer, "%0*d", 4, status.tank_pressure_psi); // 4 is the desired number of digits (using leading zeroes)
     String tank_pressure_str(buffer);
     sprintf(buffer, "%.1f", status.tank_temperature_celsius);
@@ -246,7 +246,7 @@ public:
   {
     char buffer[10];
     Logger::debug("Creating OBECStatus message...");
-    // String state_str = get_state_4_byte_string(status.current_state);
+    // String state_str = get_4_byte_string_from_state(status.current_state);
     sprintf(buffer, "%0*d", 4, status.tank_pressure_psi); // 4 is the desired number of digits (using leading zeroes)
     String tank_pressure_str(buffer);
     sprintf(buffer, "%.1f", status.tank_temperature_celsius);
@@ -306,7 +306,7 @@ bool is_LC_valve(Valve valve)
 
 String get_4_byte_string_from_valve(Valve valve)
 {
-  switch (state)
+  switch (valve)
   {
   case TANK_DEPRESS_VENT_VALVE:
     return "TDVV";
@@ -321,17 +321,17 @@ String get_4_byte_string_from_valve(Valve valve)
 
 Valve get_valve_from_4_byte_string(String valve_str)
 {
-  if (state_str.equals("TDVV") {
-    return TANK_DEPRESS_VENT_VALVE:
+  if (valve_str.equals("TDVV")) {
+    return TANK_DEPRESS_VENT_VALVE;
   } 
-  else if (state_str.equals("ENGV") {
-    return ENGINE_VALVE:
+  else if (valve_str.equals("ENGV")) {
+    return ENGINE_VALVE;
   } 
-  else if (state_str.equals("LDGV") {
-    return LOADING_VALVE:
+  else if (valve_str.equals("LDGV")) {
+    return LOADING_VALVE;
   } 
-  else if (state_str.equals("LDVV") {
-    return LOADING_LINE_DEPRESS_VENT_VALVE:
+  else if (valve_str.equals("LDVV")) {
+    return LOADING_LINE_DEPRESS_VENT_VALVE;
   } 
 }
 
@@ -400,7 +400,7 @@ public:
       }
       break;
     case SwitchStateCommand:
-      return String("SS") + get_state_4_byte_string(command.state) + String("|");
+      return String("SS") + get_4_byte_string_from_state(command.state) + String("|");
       break;
     case SetExternalVentAsDefaultCommand:
       return String("EV") + command.bool_value ? String("1") : String("0") + String("|");
@@ -419,11 +419,11 @@ public:
     }
     else if (command_type_str.equals("VC"))
     {
-      return Command(ValveCommand, message.charAt(6), get_valve_from_4_byte_string);
+      return Command(ValveCommand, message.charAt(6), get_valve_from_4_byte_string(message.substring(2, 6)));
     }
     else if (command_type_str.equals("EV"))
     {
-      return Command(SetExternalVentAsDefaultCommand, message.charAt(2).equals("1"));
+      return Command(SetExternalVentAsDefaultCommand, message.charAt(2) == '1');
     }
   }
 
