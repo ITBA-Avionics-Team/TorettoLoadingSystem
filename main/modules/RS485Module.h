@@ -22,7 +22,7 @@ class RS485Module {
 
     void send_valve_command(Command command) {
       digitalWrite(RS485_SET_TX_PIN, HIGH); // We set ourselves as the transmitter 
-      String command_msg = Command::to_message(command);
+      String command_msg = Command::to_message(command) + String("|");
       serial.print(command_msg);
       digitalWrite(RS485_SET_TX_PIN, LOW); // We set ourselves as the receiver 
     }

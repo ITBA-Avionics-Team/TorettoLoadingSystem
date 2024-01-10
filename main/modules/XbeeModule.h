@@ -17,69 +17,46 @@
 #define PACKET_COUNT_EEPROM_ADDR 4
 
 class XBeeModule {
+  HardwareSerial serial = HardwareSerial(2);;
+  char serial_buffer[30];
   public:
-    // uint16_t packetCount = 0;
-
-    // XBee mccXBee = XBee();;
-    // ZBRxResponse mccResponseObj = ZBRxResponse();
-    // ZBTxRequest mccRequestObj;
-    // ZBTxStatusResponse mccRequestStatusObj = ZBTxStatusResponse();
-
-    // CommandQueue obecCommandQueue = CommandQueue();
-    // uint8_t latestPayload1Packet[PAYLOAD_MAX_PACKAGE_LENGTH];
-
-    // void XbeeModule::init(Stream& groundXBeeSerial);
-
-    // void setRtcTimeFromPacket(uint8_t* packetData, uint8_t packetLength);
-    // void parseReceivedPacket(uint8_t* packetData, uint8_t packetLength);
-    // void parseCommandPacket(uint8_t* packetData, uint8_t packetLength);
-    // void parseTelemetryPacket(uint8_t* packetData, uint8_t packetLength);
-
-    // void sendNextPayload1Command();
-    // void sendNextPayload2Command();
-    // void sendNextTelemetryPacket();
-
-    // void get_xbee_data() {
-      
-    // }
-  
-    // void managePayloadsCommunication();
-
-    // void loop();
 
     Command check_for_commands(){
+      // digitalWrite(RS485_SET_TX_PIN, LOW); // We set ourselves as the receiver 
+      if (serial.available()) {
+            int message_len = serial.readBytesUntil('|', serial_buffer, 30);
+            String message = String(serial_buffer).substring(0, message_len);
+            return Command::from_message(message);
+      }
       return Command(EMPTY);
     }
 
-    void check_for_status_message() {
-
-    }
-
     void send_system_status(SystemStatus system_status){
-
+      // digitalWrite(RS485_SET_TX_PIN, HIGH); // We set ourselves as the transmitter 
+      String system_status_msg = SystemStatus::to_message(system_status) + String("|");
+      serial.print(system_status_msg);
     }
 
     void send_preflight_check(PreflightCheckData data) {
-
     }
 
-    void send_tank_depress_vent_tamp_low() {
-
+    void send_tank_depress_vent_temp_low() {
+      serial.print("TDVTL|");
     }
 
     void send_wind_abort() {
-      
+      serial.print("WABRT|");
     }
 
     void send_umbrilical_abort() {
-
+      serial.print("UABRT|");
     }
 
     void send_external_vent_as_default_prompt(){
-
+      serial.print("EXTVD|");
     }
 
     void send_ignition_confirmation() {
-
+      serial.print("IGNCO|");
     }
 };

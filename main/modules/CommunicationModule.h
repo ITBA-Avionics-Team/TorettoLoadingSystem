@@ -99,7 +99,7 @@ class CommunicationModule {
 
     void send_tank_depress_vent_temp_low_to_MCC() {
       Logger::debug("Communication.send_tank_depress_vent_temp_low_to_MCC");
-      mcc_xbee.send_tank_depress_vent_tamp_low();
+      mcc_xbee.send_tank_depress_vent_temp_low();
     }
 
     void send_external_vent_as_default_prompt_to_MCC() {

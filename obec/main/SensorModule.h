@@ -26,7 +26,7 @@ public:
 
   float get_tank_depres_vent_temperature_celsius()
   {
-    return 0
+    return 0;
   }
 
   float get_obec_battery_voltage_volt()

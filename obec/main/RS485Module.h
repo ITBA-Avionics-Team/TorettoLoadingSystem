@@ -1,4 +1,4 @@
-#define RS485_SET_TX_PIN 2;
+#define RS485_SET_TX_PIN 2
 
 class RS485Module {
   HardwareSerial serial = HardwareSerial(2);;
@@ -22,7 +22,7 @@ class RS485Module {
 
     void send_system_status(OBECStatus system_status) {
       digitalWrite(RS485_SET_TX_PIN, HIGH); // We set ourselves as the transmitter 
-      String system_status_msg = OBECStatus::to_message(system_status);
+      String system_status_msg = OBECStatus::to_message(system_status) + String("|");
       serial.print(system_status_msg);
     }
 };
