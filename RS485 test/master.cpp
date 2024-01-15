@@ -1,10 +1,12 @@
 const int ledPin =  13; 
-const int EnTxPin =  2;
+const int EnTxPin =  37;
 int angulo = 180;
+HardwareSerial serial = HardwareSerial(2);
 void setup() 
 { 
-  Serial.begin(9600);
-  Serial.setTimeout(100);
+  
+  serial.begin(9600, SERIAL_8N1, 13, 21);
+  // Serial.setTimeout(100);
   pinMode(ledPin, OUTPUT);
   pinMode(EnTxPin, OUTPUT);
   digitalWrite(ledPin, LOW); 
@@ -15,7 +17,7 @@ void loop()
 { 
    if (angulo == 180) angulo = 170; else angulo = 180;
 
-  Serial.print(String(angulo) + "|");
+  serial.print(String(angulo) + "|");
   delay(300); 
   
 } 
