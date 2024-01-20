@@ -9,11 +9,11 @@
 #endif // OLED_H
 
 #define SIMULATION_MODULE true
-#define SIMULATED_COMMUNICATION_MODULE true
+#define SIMULATED_SENSOR_MODULE true
+// #define SIMULATED_COMMUNICATION_MODULE true
 
 #include "modules/StorageModule.h"
 #include "modules/ControlModule.h"
-#include "modules/SensorModule.h"
 #include "modules/WeatherModule.h"
 
 #include <stdint.h>
@@ -50,7 +50,16 @@ SimulationModule simulation_module = SimulationModule();
 
 StorageModule storage_module = StorageModule();
 ControlModule control_module = ControlModule();
+
+
+#ifdef SIMULATED_SENSOR_MODULE
+#include "simulation_modules/SimulatedSensorModule.h"
+SimulatedSensorModule sensor_module = SimulatedSensorModule(simulation_module);
+#else
+#include "modules/SensorModule.h"
 SensorModule sensor_module = SensorModule();
+#endif
+
 
 #ifdef SIMULATED_COMMUNICATION_MODULE
 #include "simulation_modules/SimulatedCommunicationModule.h"

@@ -38,7 +38,7 @@ class SimulatedCommunicationModule {
     SimulatedCommunicationModule(SimulationModule& simulation_module): simulation_module(simulation_module){};
 
     Command get_latest_MCC_command() {
-      return SimulationModule::parse_command(simulation_module.communication_module_return_vals[0]);
+      return SimulationModule::parse_command_str(simulation_module.communication_module_return_vals[0]);
     }
 
     OBECStatus get_latest_OBEC_status() {
@@ -47,7 +47,7 @@ class SimulatedCommunicationModule {
     }
 
     bool get_new_MCC_command_available() {
-      return SimulationModule::parse_bool(simulation_module.communication_module_return_vals[2]);
+      return SimulationModule::parse_bool_str(simulation_module.communication_module_return_vals[2]);
     }
 
     void set_new_MCC_command_available(bool val) {
@@ -56,8 +56,8 @@ class SimulatedCommunicationModule {
     }
 
     bool get_new_OBEC_status_available() {
-      // Logger::log("[CM] get_new_OBEC_status_available()" + String(SimulationModule::parse_bool(simulation_module.communication_module_return_vals[3])));
-      return SimulationModule::parse_bool(simulation_module.communication_module_return_vals[3]);
+      // Logger::log("[CM] get_new_OBEC_status_available()" + String(SimulationModule::parse_bool_str(simulation_module.communication_module_return_vals[3])));
+      return SimulationModule::parse_bool_str(simulation_module.communication_module_return_vals[3]);
     }
 
     void set_new_OBEC_status_available(bool val) {

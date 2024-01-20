@@ -1,8 +1,10 @@
+#include "TorettoSimulationLib.h"
+
 class SimulationModule {
 
     public:
-    String communication_module_return_vals[4] = {"","", "", ""};
-    String sensor_module_return_vals[2] = {"",""};
+    String communication_module_return_vals[4] = {"","", "",""};
+    String sensor_module_return_vals[7] = {"","","","","",""};
     String weather_module_return_vals[1] = {""};
     String storage_module_return_vals[1] = {""};
 
@@ -11,56 +13,55 @@ class SimulationModule {
     }
 
     void loop() {
+        check_serial_for_simulation_commands();
+    }
+
+    void check_serial_for_simulation_commands() {
         if (Serial.available()) {
             char buffer[50];
-            int module_id_len = Serial.readBytesUntil(',', buffer, 10);
-            if (module_id_len != 2){
-                Logger::error("[SimModule] Message received with module_id of different length than 2 chars.");
-            }
-            String module_id = String(buffer).substring(0, module_id_len);
-            // Logger::error("ModuleIdLen - " + String(module_id_len));
-
-            int function_id_len = Serial.readBytesUntil(',', buffer, 10);
-            int function_id = String(buffer).substring(0, function_id_len).toInt();
-            
-            int value_len = Serial.readBytesUntil('|', buffer, 30);
-            String value = String(buffer).substring(0, value_len);
-            
-            // TODO: Check if the value has a newline at the end and send a warning, or strip it.
-            if (module_id.equals("CM")) {
-                Logger::debug("[SM]Received CM data fID" + String(function_id) + String("-") + value);
-                communication_module_return_vals[function_id] = value;
-            }
-            else if(module_id.equals("SE")) {
-                sensor_module_return_vals[function_id] = value;
-            }
-            else if (module_id.equals("WE")) {
-                weather_module_return_vals[function_id] = value;
-            }
-            else if (module_id.equals("ST")) {
-                storage_module_return_vals[function_id] = value;
-            } else {
-                Logger::debug(String("No module recognized:") + String(module_id));
-            }
+            int message_len = Serial.readBytesUntil('|', buffer, 40);
+            SimulationCommand command = SimulationCommand::from_message(String(buffer).substring(0, message_len));
+            save_simulation_command_value(command);
         }
     }
 
-    static Command parse_command(String cmd_str) {
-        if (cmd_str.substring(0,2).equals("SS")){
-            String state_str = cmd_str.substring(2,6);
-            if (state_str.equals("LDNG")){
-                return Command(SwitchStateCommand, LOADING);
-            }
+    void save_simulation_command_value(SimulationCommand command) {
+        switch (command.module) {
+            case COMMUNICATION_MODULE:
+                communication_module_return_vals[command.function_id] = command.value;
+                break;
+            case SENSOR_MODULE:
+                sensor_module_return_vals[command.function_id] = command.value;
+                break;
+            case WEATHER_MODULE:
+                weather_module_return_vals[command.function_id] = command.value;
+                break;
+            case STORAGE_MODULE:
+                storage_module_return_vals[command.function_id] = command.value;
+                break;
+            default:
+                Logger::debug(String("No module recognized:") + String(command.module));
+
         }
-        return Command();
     }
 
-    static OBECStatus parse_OBEC_status(String status_str) {
-        Logger::debug("Parsing obec status..." + status_str);
+    static Command parse_command_str(String cmd_str) {
+        return Command::from_message(cmd_str);
+    }
+
+    static OBECStatus parse_OBEC_status_str(String status_str) {
         return OBECStatus::from_message(status_str);
     }
 
-    static bool parse_bool(String bool_str) {
+    static int parse_int_str(String int_str) {
+        return int_str.toInt();
+    }
+
+    static float parse_float_str(String float_str) {
+        return float_str.toFloat();
+    }
+
+    static bool parse_bool_str(String bool_str) {
         return bool_str.equals("1");
     }
 
