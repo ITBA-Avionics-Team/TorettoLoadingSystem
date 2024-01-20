@@ -181,9 +181,9 @@ public:
     String tank_depress_vent_temperature_celsius_str(buffer);
     sprintf(buffer, "%0*d", 4, status.loading_line_pressure_psi); // 4 is the desired number of digits (using leading zeroes)
     String loading_line_pressure_str(buffer);
-    sprintf(buffer, "%.12f", status.obec_battery_voltage_volt);
+    sprintf(buffer, "%.2f", status.obec_battery_voltage_volt);
     String obec_battery_voltage_str(buffer);
-    sprintf(buffer, "%.12f", status.lc_battery_voltage_volt);
+    sprintf(buffer, "%.2f", status.lc_battery_voltage_volt);
     String lc_battery_voltage_str(buffer);
     String status_flags_str = String(SystemStatus::create_status_flags_byte(status.obec_connection_ok,
                                                                             status.tank_depress_vent_valve_open,
