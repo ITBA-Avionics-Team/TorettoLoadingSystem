@@ -15,7 +15,7 @@ class OLEDModule {
     Heltec.display->clear();
     Heltec.display->setFont(ArialMT_Plain_10);
     Heltec.display->setTextAlignment(TEXT_ALIGN_LEFT);
-    Heltec.display->drawStringMaxWidth(0, 0, 128, text);
+    Heltec.display->drawStringMaxWidth(0, 0, 21, text);
     Heltec.display->display();
   }
 

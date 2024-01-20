@@ -50,7 +50,7 @@ class Logger {
     static void log(String message) {
       // Serial.print("[Log] ");
       // Serial.println(message);
-      OLEDModule::printText("[Log] " + message);
+      OLEDModule::printText(message);
     }
 
 

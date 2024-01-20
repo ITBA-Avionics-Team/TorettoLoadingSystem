@@ -92,7 +92,7 @@ void loop() {
   unsigned long currMilis = millis();
 
 
-#ifdef SIMULATED_COMMUNICATION_MODULE
+#ifdef SIMULATION_MODULE
   if (currMilis - simulation_mode_update_millis > 200) {
     simulation_module.loop();  
     simulation_mode_update_millis = currMilis;
@@ -140,6 +140,8 @@ void loop() {
     }
 
     update_sensor_and_weather_data();
+
+    Logger::log(SystemStatus::to_message(system_status) + String("|"));
 
     communication_module.send_system_status_to_MCC(system_status);
 
