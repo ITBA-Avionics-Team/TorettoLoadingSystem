@@ -5,8 +5,8 @@
 #include "TorettoLib.h"
 #endif // TORETTOLIB_H
 
-#include "modules/XbeeModule.h"
-#include "modules/RS485Module.h"
+#include "XbeeModule.h"
+#include "RS485Module.h"
 
 #define STATE_IDLE 0
 #define STATE_WAITING_FOR_GROUND_RESPONSE 1
@@ -62,7 +62,7 @@ class CommunicationModule {
     }
 
     void send_valve_command_to_OBEC(Command command) {
-      obec_communication.send_valve_command(command);
+      // obec_communication.send_valve_command(command);
     }
 
     void send_abort_signal_to_OBEC() {

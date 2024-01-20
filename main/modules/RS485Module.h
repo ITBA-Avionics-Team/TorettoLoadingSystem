@@ -1,22 +1,25 @@
-#define RS485_SET_TX_PIN 2
+#define RS485_SET_TX_PIN 37
 
 class RS485Module {
   HardwareSerial serial = HardwareSerial(2);;
   char serial_buffer[30];
   public:
     RS485Module() {
-      serial.begin(9600, SERIAL_8N1, 13, -1);
+      serial.begin(115200, SERIAL_8N1, 13, 21);
       pinMode(RS485_SET_TX_PIN, OUTPUT);
+      digitalWrite(RS485_SET_TX_PIN, LOW); // We set ourselves as the receiver 
     }
 
     OBECStatus check_for_status_message() {
-      digitalWrite(RS485_SET_TX_PIN, LOW); // We set ourselves as the receiver 
+      // digitalWrite(RS485_SET_TX_PIN, LOW); // We set ourselves as the receiver 
       if (serial.available()) {
             int message_len = serial.readBytesUntil('|', serial_buffer, 30);
             String message = String(serial_buffer).substring(0, message_len);
+            // Serial.print(message + String("|"));
+            Logger::debug(message);
             return OBECStatus::from_message(message);
       }
-      digitalWrite(RS485_SET_TX_PIN, HIGH); // We set ourselves as the transmitter 
+      // digitalWrite(RS485_SET_TX_PIN, HIGH); // We set ourselves as the transmitter 
       return OBECStatus(-1, -1, -1, -1, false, false);
     }
 
