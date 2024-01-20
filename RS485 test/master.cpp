@@ -5,7 +5,7 @@ HardwareSerial serial = HardwareSerial(2);
 void setup() 
 { 
   
-  serial.begin(9600, SERIAL_8N1, 13, 21);
+  serial.begin(115200, SERIAL_8N1, 13, 21);
   // Serial.setTimeout(100);
   pinMode(ledPin, OUTPUT);
   pinMode(EnTxPin, OUTPUT);

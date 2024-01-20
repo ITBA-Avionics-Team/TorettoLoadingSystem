@@ -8,7 +8,7 @@ unsigned long last_millis = 0;
 char buffer[10];
 void setup() 
 { 
-  Serial.begin(9600);  
+  Serial.begin(115200);  
   myservo.attach(9);  //Servo pin
   pinMode(EnTxPin, OUTPUT);
   digitalWrite(EnTxPin, LOW); // Set ourselves as the receiver
