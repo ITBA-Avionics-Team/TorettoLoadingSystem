@@ -166,37 +166,66 @@ public:
   bool external_vent_as_default;
   int wind_kt;
 
-  // Format is <state><tank_p><tank_t><tank_depress_vent_t><loading_line_p><obec_voltage><lc_voltage><sensor_data_byte><wind>
-  // Example result (minus the spaces): STBY 0014 10.1 25.2 0014 4.12 4.20 ? 008
+  // Format is <state><tank_p><tank_t><tank_depress_vent_t><loading_line_p><obec_voltage>
+  //           <lc_voltage><connection_to_obec_ok><tank_depress_vent_valve_open><engine_valve_open>
+  //           <loading_valve_open><loading_depress_vent_valve_open><umbilical_connected><igniter_continuity_ok><external_vent_as_default><wind>
+  // Example result (minus the spaces): STBY 0000 00.0 00.0 0098 0.00 4.20 1000011 000
   static String to_message(SystemStatus status)
   {
     char buffer[10];
     Logger::debug("Creating SystemStatus message...");
     String state_str = get_4_byte_string_from_state(status.current_state);
-    sprintf(buffer, "%0*d", 4, status.tank_pressure_psi); // 4 is the desired number of digits (using leading zeroes)
+    sprintf(buffer, "%04d", status.tank_pressure_psi); // 4 is the desired number of digits (using leading zeroes)
     String tank_pressure_str(buffer);
-    sprintf(buffer, "%.1f", status.tank_temperature_celsius);
-    String tank_temperature_str(buffer);
-    sprintf(buffer, "%.1f", status.tank_depress_vent_temperature_celsius);
-    String tank_depress_vent_temperature_celsius_str(buffer);
-    sprintf(buffer, "%0*d", 4, status.loading_line_pressure_psi); // 4 is the desired number of digits (using leading zeroes)
+    String tank_temperature_str = get_formatted_temp_string(status.tank_temperature_celsius);
+    String tank_depress_vent_temperature_celsius_str = get_formatted_temp_string(status.tank_depress_vent_temperature_celsius);
+    sprintf(buffer, "%04d", status.loading_line_pressure_psi); // 4 is the desired number of digits (using leading zeroes)
     String loading_line_pressure_str(buffer);
-    sprintf(buffer, "%.2f", status.obec_battery_voltage_volt);
-    String obec_battery_voltage_str(buffer);
-    sprintf(buffer, "%.2f", status.lc_battery_voltage_volt);
-    String lc_battery_voltage_str(buffer);
-    String status_flags_str = String(SystemStatus::create_status_flags_byte(status.obec_connection_ok,
-                                                                            status.tank_depress_vent_valve_open,
-                                                                            status.engine_valve_open,
-                                                                            status.loading_valve_open,
-                                                                            status.loading_depress_vent_valve_open,
-                                                                            status.hydraulic_umbrilical_connected,
-                                                                            status.igniter_continuity_ok),
-                                     1);
-    sprintf(buffer, "%0*d", 3, status.wind_kt); // 3 is the desired number of digits (using leading zeroes)
+    String obec_battery_voltage_str = String(status.obec_battery_voltage_volt, 2);
+    String lc_battery_voltage_str = String(status.lc_battery_voltage_volt, 2);
+    String status_flags_str = get_status_flags_string(status.obec_connection_ok,
+                                                      status.tank_depress_vent_valve_open,
+                                                      status.engine_valve_open,
+                                                      status.loading_valve_open,
+                                                      status.loading_depress_vent_valve_open,
+                                                      status.hydraulic_umbrilical_connected,
+                                                      status.igniter_continuity_ok);
+    sprintf(buffer, "%03d", status.wind_kt); // 3 is the desired number of digits (using leading zeroes)
     String wind_str(buffer);
 
-    return state_str + tank_pressure_str + tank_temperature_str + tank_depress_vent_temperature_celsius_str + loading_line_pressure_str + obec_battery_voltage_str + lc_battery_voltage_str + status_flags_str + wind_str;
+    return state_str +
+          tank_pressure_str +
+          tank_temperature_str +
+          tank_depress_vent_temperature_celsius_str +
+          loading_line_pressure_str +
+          obec_battery_voltage_str +
+          lc_battery_voltage_str +
+          status_flags_str +
+          wind_str;
+  }
+
+  static String get_status_flags_string(bool obec_connection_ok,
+                                          bool tank_depress_vent_valve_open,
+                                          bool engine_valve_open,
+                                          bool loading_valve_open,
+                                          bool loading_depress_vent_valve_open,
+                                          bool hydraulic_umbrilical_connected,
+                                          bool igniter_continuity_ok) {
+    return String(obec_connection_ok ? "1" : "0") + 
+           String(tank_depress_vent_valve_open ? "1" : "0") + 
+           String(engine_valve_open ? "1" : "0") + 
+           String(loading_valve_open ? "1" : "0") + 
+           String(loading_depress_vent_valve_open ? "1" : "0") + 
+           String(hydraulic_umbrilical_connected ? "1" : "0") + 
+           String(igniter_continuity_ok ? "1" : "0");
+  }
+
+  static String get_formatted_temp_string(float temp) {
+    if (temp >= 100) return String("99.0");
+    if (temp >= 10) return String(temp, 1);
+    if (temp >= 0) return String("0") + String(temp, 1);
+    if (temp > -10) return String("0") + String(temp, 1);
+    return String((int)temp);
   }
 };
 
@@ -251,8 +280,8 @@ public:
     String tank_temperature_str = String(status.tank_temperature_celsius, 1);
     String tank_depress_vent_temperature_str = String(status.tank_depress_vent_temperature_celsius, 1);
     String obec_battery_voltage_str = String(status.obec_battery_voltage_volt, 2);
-    String status_flags_str = String(OBECStatus::create_status_flags_byte(status.tank_depress_vent_valve_open,
-                                                                          status.engine_valve_open));
+    String status_flags_str = get_status_flags_string(status.tank_depress_vent_valve_open,
+                                                      status.engine_valve_open);
 
     return tank_pressure_str +
            tank_temperature_str +
@@ -263,15 +292,14 @@ public:
 
   static OBECStatus from_message(String message)
   {
-    char sensor_data_byte = message.charAt(16);
     // TODO: if invalid, should return empty status
     OBECStatus result = OBECStatus(
         message.substring(0, 4).toInt(),
         message.substring(4, 8).toFloat(),
         message.substring(8, 12).toFloat(),
         message.substring(12, 16).toFloat(),
-        sensor_data_byte & 0b01,
-        sensor_data_byte & 0b10);
+        message.charAt(17) == '1',
+        message.charAt(18) == '1');
     return result;
   }
   static bool is_empty(OBECStatus status)
@@ -282,6 +310,12 @@ public:
            status.obec_battery_voltage_volt == -1 &&
            status.tank_depress_vent_valve_open == false &&
            status.engine_valve_open == false;
+  }
+
+    static String get_status_flags_string(bool tank_depress_vent_valve_open,
+                                          bool engine_valve_open) {
+    return String(tank_depress_vent_valve_open ? "1" : "0") + 
+           String(engine_valve_open ? "1" : "0");
   }
 };
 
