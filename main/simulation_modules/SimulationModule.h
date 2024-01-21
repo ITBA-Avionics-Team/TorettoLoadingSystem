@@ -13,7 +13,7 @@ class SimulationModule {
 
     public:
     String communication_module_return_vals[4] = {"","", "",""};
-    String sensor_module_return_vals[7] = {"","","","","",""};
+    String sensor_module_return_vals[7] = {"","","","","","", ""};
     String weather_module_return_vals[1] = {""};
     String storage_module_return_vals[1] = {""};
 
