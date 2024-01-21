@@ -145,7 +145,7 @@ class SystemStatus
     result << 1;
     if (igniter_continuity_ok)
       result++;
-    return result;
+    return result + (1 << 7); // WARNING: LAST BIT SHOULD NOT BE USED!!
   }
 
 public:
@@ -212,7 +212,7 @@ class OBECStatus
     result << 1;
     if (engine_valve_open)
       result++;
-    return result;
+    return result + (1 << 3);// WARNING: LAST BIT SHOULD NOT BE USED!!
   }
 
 public:
@@ -244,20 +244,15 @@ public:
   // Example result (minus the spaces): 0014 10.1 25.2 4.12 ?
   static String to_message(OBECStatus status)
   {
-    char buffer[10];
+    char buffer[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
     Logger::debug("Creating OBECStatus message...");
-    // String state_str = get_4_byte_string_from_state(status.current_state);
-    sprintf(buffer, "%0*d", 4, status.tank_pressure_psi); // 4 is the desired number of digits (using leading zeroes)
+    sprintf(buffer, "%04d", status.tank_pressure_psi); // 4 is the desired number of digits (using leading zeroes)
     String tank_pressure_str(buffer);
-    sprintf(buffer, "%.1f", status.tank_temperature_celsius);
-    String tank_temperature_str(buffer);
-    sprintf(buffer, "%.1f", status.tank_depress_vent_temperature_celsius);
-    String tank_depress_vent_temperature_str(buffer);
-    sprintf(buffer, "%.12f", status.obec_battery_voltage_volt);
-    String obec_battery_voltage_str(buffer);
+    String tank_temperature_str = String(status.tank_temperature_celsius, 1);
+    String tank_depress_vent_temperature_str = String(status.tank_depress_vent_temperature_celsius, 1);
+    String obec_battery_voltage_str = String(status.obec_battery_voltage_volt, 2);
     String status_flags_str = String(OBECStatus::create_status_flags_byte(status.tank_depress_vent_valve_open,
-                                                                          status.engine_valve_open),
-                                     1);
+                                                                          status.engine_valve_open));
 
     return tank_pressure_str +
            tank_temperature_str +
