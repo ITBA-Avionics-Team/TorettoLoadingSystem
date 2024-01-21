@@ -270,7 +270,7 @@ public:
   }
 
   // Format is <tank_p><tank_t><tank_depress_vent_t><obec_voltage><sensor_data_byte>
-  // Example result (minus the spaces): 0014 10.1 25.2 4.12 ?
+  // Example result (minus the spaces): 0110 20.0 24.0 4.17 0 0
   static String to_message(OBECStatus status)
   {
     char buffer[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
