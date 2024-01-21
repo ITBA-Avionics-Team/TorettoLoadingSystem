@@ -2,7 +2,7 @@
 #include <stdint.h>
 #ifndef TORETTOLIB_H
 #define TORETTOLIB_H
-#include "TorettoLib.h"
+#include "../TorettoLib.h"
 #endif // TORETTOLIB_H
 
 #include "RS485Module.h"

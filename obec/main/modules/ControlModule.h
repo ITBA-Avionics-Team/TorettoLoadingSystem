@@ -1,7 +1,7 @@
 #ifndef TORETTOLIB_H
 #define TORETTOLIB_H
 
-#include "TorettoLib.h"
+#include "../TorettoLib.h"
 #endif // TORETTOLIB_H
 
 class ControlModule {

@@ -2,9 +2,17 @@
 #define LOGGER_H
 #include "Logger.h"
 #endif // LOGGER_H
-#include "ControlModule.h"
-#include "CommunicationModule.h"
-#include "SensorModule.h"
+
+#ifndef TORETTOLIB_H
+#define TORETTOLIB_H
+
+#include "TorettoLib.h"
+#endif // TORETTOLIB_H
+
+#define SIMULATION_MODULE true
+#define SIMULATED_SENSOR_MODULE true
+// #define SIMULATED_COMMUNICATION_MODULE true
+
 #include <stdint.h>
 #include <string.h>
 
@@ -13,15 +21,38 @@
 OBECStatus system_status = OBECStatus();
 unsigned long last_milis = 0;
 unsigned long last_lc_update_milis = 0;
+unsigned long simulation_mode_update_millis = 0;
 
 // Modules
+#ifdef SIMULATION_MODULE
+#include "simulation_modules/SimulationModule.h"
+SimulationModule simulation_module = SimulationModule();
+#endif
+
+
+#include "modules/ControlModule.h"
 ControlModule control_module = ControlModule();
+
+#ifdef SIMULATED_SENSOR_MODULE
+#include "simulation_modules/SimulatedSensorModule.h"
+SimulatedSensorModule sensor_module = SimulatedSensorModule(simulation_module);
+#else
+#include "modules/SensorModule.h"
 SensorModule sensor_module = SensorModule();
+#endif
+
+
+#ifdef SIMULATED_COMMUNICATION_MODULE
+#include "simulation_modules/SimulatedCommunicationModule.h"
+SimulatedCommunicationModule communication_module = SimulatedCommunicationModule(simulation_module);
+#else
+#include "modules/CommunicationModule.h"
 CommunicationModule communication_module = CommunicationModule();
+#endif
 
 void setup()
 {
-  Serial.begin(19200);
+  Serial.begin(115200);
 
   sensor_module.init();
   control_module.init();
@@ -34,8 +65,15 @@ void loop()
 {
   unsigned long currMilis = millis();
 
+#ifdef SIMULATION_MODULE
+  if (currMilis - simulation_mode_update_millis > 200) {
+    simulation_module.loop();  
+    simulation_mode_update_millis = currMilis;
+  }
+#endif
+
   if (currMilis - last_lc_update_milis > 300) {
-    communication_module.check_for_LC_commands();
+    // communication_module.check_for_LC_commands();
   
     if (communication_module.new_LC_command_available) {
       control_module.execute_valve_command(communication_module.latest_LC_command);
