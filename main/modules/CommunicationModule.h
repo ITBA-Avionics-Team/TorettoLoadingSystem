@@ -38,11 +38,11 @@ class CommunicationModule {
     }
 
     Command get_latest_MCC_command() {
-
+      return latest_MCC_command;
     }
 
     OBECStatus get_latest_OBEC_status() {
-      
+      return latest_OBEC_status;
     }
 
     bool get_new_MCC_command_available() {

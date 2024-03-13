@@ -127,9 +127,7 @@ void loop() {
     if (communication_module.get_new_OBEC_status_available()) {
       // Logger::log("[Main]new OBEC status available");
       OBECStatus obec_status = communication_module.get_latest_OBEC_status();
-      // Logger::log("[Main]got latest OBEC status");
       system_status.tank_pressure_psi = obec_status.tank_pressure_psi;
-      // Logger::log(system_status.tank_pressure_psi);
       system_status.tank_temperature_celsius = obec_status.tank_temperature_celsius;
       system_status.tank_depress_vent_temperature_celsius = obec_status.tank_depress_vent_temperature_celsius;
       system_status.obec_battery_voltage_volt = obec_status.obec_battery_voltage_volt;
@@ -140,8 +138,6 @@ void loop() {
     }
 
     update_sensor_and_weather_data();
-
-    Logger::log(SystemStatus::to_message(system_status) + String("|"));
 
     communication_module.send_system_status_to_MCC(system_status);
 

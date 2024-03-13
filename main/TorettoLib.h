@@ -245,12 +245,12 @@ class OBECStatus
   }
 
 public:
-  int tank_pressure_psi;
-  float tank_temperature_celsius;
-  float tank_depress_vent_temperature_celsius;
-  float obec_battery_voltage_volt;
-  bool tank_depress_vent_valve_open;
-  bool engine_valve_open;
+  int tank_pressure_psi = -1;
+  float tank_temperature_celsius = -1;
+  float tank_depress_vent_temperature_celsius = -1;
+  float obec_battery_voltage_volt = -1;
+  bool tank_depress_vent_valve_open = false;
+  bool engine_valve_open = false;
 
   OBECStatus() {}
 
