@@ -75,7 +75,7 @@ void setup()
 {
   Serial.begin(115200);
 
-  OLEDModule::init();
+  //OLEDModule::init();
 
   storage_module.init();
   // sensor_module.init();

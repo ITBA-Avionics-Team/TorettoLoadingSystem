@@ -19,4 +19,9 @@ TimedSimulationCommand NOMINAL_SCENARIO[] = {
 
   {4000, SimulationCommand(SENSOR_MODULE, 0, "98")}, // get_loading_line_pressure_psi 98
   {7000, SimulationCommand(SENSOR_MODULE, 0, "110")}, // get_loading_line_pressure_psi 110
+
+  {7000, SimulationCommand(SENSOR_MODULE, 3, "1")}, // get_loading_valve_open 1
+  {8000, SimulationCommand(SENSOR_MODULE, 3, "0")}, // get_loading_valve_open 0
+  {9000, SimulationCommand(SENSOR_MODULE, 3, "1")}, // get_loading_valve_open 1
+  {10000, SimulationCommand(SENSOR_MODULE, 3, "0")}, // get_loading_valve_open 0
 };
