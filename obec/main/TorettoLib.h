@@ -116,6 +116,7 @@ String get_state_complete_string(State state)
 
 class SystemStatus
 {
+  // Deprecated
   static char create_status_flags_byte(bool obec_connection_ok,
                                        bool tank_depress_vent_valve_open,
                                        bool engine_valve_open,
@@ -124,6 +125,7 @@ class SystemStatus
                                        bool hydraulic_umbrilical_connected,
                                        bool igniter_continuity_ok)
   {
+    Logger::error("SystemStatus.create_status_flags_byte() IS DEPRECATED AND SHOULD NOT BE USED!");
     char result = 0;
     if (obec_connection_ok)
       result++;
@@ -189,7 +191,8 @@ public:
                                                       status.loading_valve_open,
                                                       status.loading_depress_vent_valve_open,
                                                       status.hydraulic_umbrilical_connected,
-                                                      status.igniter_continuity_ok);
+                                                      status.igniter_continuity_ok,
+                                                      status.external_vent_as_default);
     sprintf(buffer, "%03d", status.wind_kt); // 3 is the desired number of digits (using leading zeroes)
     String wind_str(buffer);
 
@@ -210,14 +213,16 @@ public:
                                           bool loading_valve_open,
                                           bool loading_depress_vent_valve_open,
                                           bool hydraulic_umbrilical_connected,
-                                          bool igniter_continuity_ok) {
+                                          bool igniter_continuity_ok,
+                                          bool external_vent_as_default) {
     return String(obec_connection_ok ? "1" : "0") + 
            String(tank_depress_vent_valve_open ? "1" : "0") + 
            String(engine_valve_open ? "1" : "0") + 
            String(loading_valve_open ? "1" : "0") + 
            String(loading_depress_vent_valve_open ? "1" : "0") + 
            String(hydraulic_umbrilical_connected ? "1" : "0") + 
-           String(igniter_continuity_ok ? "1" : "0");
+           String(igniter_continuity_ok ? "1" : "0") + 
+           String(external_vent_as_default ? "1" : "0");
   }
 
   static String get_formatted_temp_string(float temp) {
@@ -232,9 +237,11 @@ public:
 class OBECStatus
 {
 
+ // Deprecated
   static char create_status_flags_byte(bool tank_depress_vent_valve_open,
                                        bool engine_valve_open)
   {
+    Logger::error("OBECStatus.create_status_flags_byte() IS DEPRECATED AND SHOULD NOT BE USED!");
     char result = 0;
     if (tank_depress_vent_valve_open)
       result++;
@@ -245,12 +252,12 @@ class OBECStatus
   }
 
 public:
-  int tank_pressure_psi;
-  float tank_temperature_celsius;
-  float tank_depress_vent_temperature_celsius;
-  float obec_battery_voltage_volt;
-  bool tank_depress_vent_valve_open;
-  bool engine_valve_open;
+  int tank_pressure_psi = -1;
+  float tank_temperature_celsius = -1;
+  float tank_depress_vent_temperature_celsius = -1;
+  float obec_battery_voltage_volt = -1;
+  bool tank_depress_vent_valve_open = false;
+  bool engine_valve_open = false;
 
   OBECStatus() {}
 

@@ -34,6 +34,7 @@ class XBeeModule {
       // digitalWrite(RS485_SET_TX_PIN, HIGH); // We set ourselves as the transmitter 
       
       String system_status_msg = SystemStatus::to_message(system_status) + String("|");
+      Serial.println(system_status_msg);
       Logger::log(String("Sending system status message to MCC ") + system_status_msg);
     }
 

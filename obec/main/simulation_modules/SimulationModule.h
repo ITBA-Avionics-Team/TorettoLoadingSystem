@@ -8,7 +8,7 @@
 class SimulationModule {
 
     int local_simulation_scenario_command_index = 0;
-    int local_simulated_scenario_length = 8; // IMPORTANT: MODIFY WHEN MODIFYING LOCAL SIMULATED SCENARIO
+    int local_simulated_scenario_length = 9; // IMPORTANT: MODIFY WHEN MODIFYING LOCAL SIMULATED SCENARIO
     // TimedSimulationCommand local_simulated_scenario[] = NOMINAL_SCENARIO;
 
     public:

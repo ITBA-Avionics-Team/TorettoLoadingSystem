@@ -1,12 +1,13 @@
-#ifndef OLED_H
-#define OLED_H
-#include "OLEDModule.h"
-#endif // OLED_H
+// #ifndef OLED_H
+// #define OLED_H
+// #include "OLEDModule.h"
+// #endif // OLED_H
 #include <stdint.h>
 
 class Logger {
-  static const bool debugActivated = true;
   static const bool errorActivated = false;
+  static const bool debugActivated = false;
+  static const bool logActivated = false;
 
   public:
     static void error(float value) {
@@ -42,14 +43,18 @@ class Logger {
     }
 
     static void log(float value) {
-      Serial.print("[Log] ");
-      Serial.println(value);
+      if (logActivated) {
+        Serial.print("[Log] ");
+        Serial.println(value);
+      }
       //OLEDModule::printText("[Log] " + String(value));
     }
 
     static void log(String message) {
-      Serial.print("[Log] ");
-      Serial.println(message);
+      if (logActivated) {
+        Serial.print("[Log] ");
+        Serial.println(message);
+      }
       //OLEDModule::printText(message);
     }
 
