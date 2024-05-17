@@ -38,8 +38,8 @@ class SimulationModule {
     void check_for_local_simulation_scenario_commands() {
         if (local_simulation_scenario_command_index >= local_simulated_scenario_length) return;
 
-        if (millis() >= NOMINAL_SCENARIO[local_simulation_scenario_command_index].command_time_ms) {
-            SimulationCommand command = NOMINAL_SCENARIO[local_simulation_scenario_command_index].command;
+        if (millis() >= NOMINAL_STANDBY_SCENARIO[local_simulation_scenario_command_index].command_time_ms) {
+            SimulationCommand command = NOMINAL_STANDBY_SCENARIO[local_simulation_scenario_command_index].command;
             save_simulation_command_value(command);
             // Serial.println(String("Saving command:") + command.value);
             local_simulation_scenario_command_index++;

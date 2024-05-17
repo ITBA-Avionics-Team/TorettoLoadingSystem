@@ -9,7 +9,7 @@
 #endif // OLED_H
 
 #define SIMULATION_MODULE true
-#define SIMULATED_SENSOR_MODULE true
+// #define SIMULATED_SENSOR_MODULE true
 // #define SIMULATED_COMMUNICATION_MODULE true
 
 #include "modules/StorageModule.h"
@@ -71,14 +71,18 @@ CommunicationModule communication_module = CommunicationModule();
 
 WeatherModule weather_module = WeatherModule();
 
+#define LED_PIN 2
+
 void setup()
 {
   Serial.begin(115200);
 
   //OLEDModule::init();
+  pinMode(LED_PIN, OUTPUT);
 
   storage_module.init();
-  // sensor_module.init();
+  control_module.init();
+  sensor_module.init();
   // electromechanical_module.init();
   // communication_module.init();
 
@@ -109,6 +113,7 @@ void loop() {
       switch (command.type) {
         case ValveCommand:
           if (is_LC_valve(command.valve)) {
+            digitalWrite(LED_PIN, HIGH);
             control_module.execute_valve_command(command);
           } else {
             communication_module.send_valve_command_to_OBEC(command);
@@ -206,9 +211,10 @@ void loop() {
       }
       break;
     case PRE_LAUNCH_UMBRILICAL_DISCONNECT:
-      if (currMilis - umbrilical_disconnect_time > 600) {
-        if (!sensor_module.get_hydraulic_umbrilical_connected()) {
+      if (currMilis - umbrilical_disconnect_time > 5000) {
+        if (sensor_module.get_hydraulic_umbrilical_connected()) {
           communication_module.send_umbrilical_abort_to_MCC();
+          switch_to_state(STANDBY);
           break;
         }
         if (currMilis - umbrilical_disconnect_time > 10000) {
@@ -226,6 +232,12 @@ void loop() {
         // Value between 0 and 255 would look something like
         // (((currMilis - ignition_start_time) - 500) / 2500) * 255
         // We might want to make this discrete by using last_milis like we do in other states.
+        
+        // Open bleed 3% for 1000ms (1 seconds) before igniters
+        // Igniters on for 3 seconds
+        // Open 100% and leave open
+        // 1 second later Igniters off total 4 secs of gniters
+
       } else {
         switch_to_state(IGNITION_IGNITERS_OFF);
       }
@@ -259,7 +271,7 @@ void switch_to_state(State newState) {
         communication_module.send_valve_command_to_OBEC(Command(ValveCommand, Close, ENGINE_VALVE));
         control_module.execute_valve_command(Command(ValveCommand, Close, LOADING_LINE_DEPRESS_VENT_VALVE));
         communication_module.send_valve_command_to_OBEC(Command(ValveCommand, Open, TANK_DEPRESS_VENT_VALVE));
-        if (system_status.tank_depress_vent_temperature_celsius < TANK_DEPRESS_VENT_LOW_TEMP) {
+        if (system_status.tank_depress_vent_temperature_celsius < TANK_DEPRESS_VENT_LOW_TEMP) { // TODO: This measurement probably isn't reliable if we check the temperature as soon as we send the signal to open the valve.
           communication_module.send_tank_depress_vent_temp_low_to_MCC();
           switch_to_state(STANDBY);
         } else {

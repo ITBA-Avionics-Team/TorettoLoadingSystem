@@ -1,5 +1,5 @@
-#define RS485_SET_TX_PIN 18
-#define RS485_SET_RX_PIN 5
+#define RS485_SET_TX_PIN 5
+#define RS485_SET_RX_PIN 18
 
 class RS485Module {
   char serial_buffer[30];

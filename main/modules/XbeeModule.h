@@ -16,6 +16,9 @@
 
 #define PACKET_COUNT_EEPROM_ADDR 4
 
+
+#define XBEE_RST_PIN 22
+
 class XBeeModule {
   char serial_buffer[30];
   public:
@@ -35,7 +38,7 @@ class XBeeModule {
       
       String system_status_msg = SystemStatus::to_message(system_status) + String("|");
       Serial.println(system_status_msg);
-      Logger::log(String("Sending system status message to MCC ") + system_status_msg);
+      // Logger::log(String("Sending system status message to MCC ") + system_status_msg);
     }
 
     void send_preflight_check(PreflightCheckData data) {

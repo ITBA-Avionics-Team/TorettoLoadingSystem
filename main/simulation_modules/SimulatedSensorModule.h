@@ -44,7 +44,9 @@ class SimulatedSensorModule {
   }
 
   bool get_hydraulic_umbrilical_connected() {
-    return SimulationModule::parse_bool_str(simulation_module.sensor_module_return_vals[5]);
+    // TODO: Should we always assume that the umbrilical is disconnected
+    return false;
+    //return SimulationModule::parse_bool_str(simulation_module.sensor_module_return_vals[5]);
   }
 
   bool get_igniter_continuity_ok(){
