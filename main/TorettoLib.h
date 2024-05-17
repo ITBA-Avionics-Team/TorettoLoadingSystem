@@ -422,16 +422,16 @@ public:
       switch (command.valve)
       {
       case TANK_DEPRESS_VENT_VALVE:
-        return String("VCTDVV") + String((char)command.uint_value, 1) + String("|");
+        return String("VCTDVV") + (command.uint_value == Open ? "1" : "0") + String("|");
         break;
       case ENGINE_VALVE:
-        return String("VCENGV") + String((char)command.uint_value, 1) + String("|");
+        return String("VCENGV") + (command.uint_value == Open ? "1" : "0") + String("|");
         break;
       case LOADING_VALVE:
-        return String("VCLDGV") + String((char)command.uint_value, 1) + String("|");
+        return String("VCLDGV") + (command.uint_value == Open ? "1" : "0") + String("|");
         break;
       case LOADING_LINE_DEPRESS_VENT_VALVE:
-        return String("VCLDVV") + String((char)command.uint_value, 1) + String("|");
+        return String("VCLDVV") + (command.uint_value == Open ? "1" : "0") + String("|");
         break;
       }
       break;
@@ -455,11 +455,13 @@ public:
     }
     else if (command_type_str.equals("VC"))
     {
-      return Command(ValveCommand, message.charAt(6), get_valve_from_4_byte_string(message.substring(2, 6)));
+      return Command(ValveCommand, message.charAt(6) == '0' ? Close : Open, get_valve_from_4_byte_string(message.substring(2, 6)));
     }
     else if (command_type_str.equals("EV"))
     {
       return Command(SetExternalVentAsDefaultCommand, message.charAt(2) == '1');
+    } else {
+      return Command(EMPTY);
     }
   }
 
