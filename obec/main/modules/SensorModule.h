@@ -14,7 +14,7 @@ public:
     Logger::log("Sensor Module initialized.");
   }
 
-  int get_tank_pressure_psi()
+  int get_tank_pressure_bar()
   {
     return 0;
   }

@@ -132,7 +132,7 @@ void loop() {
     if (communication_module.get_new_OBEC_status_available()) {
       // Logger::log("[Main]new OBEC status available");
       OBECStatus obec_status = communication_module.get_latest_OBEC_status();
-      system_status.tank_pressure_psi = obec_status.tank_pressure_psi;
+      system_status.tank_pressure_bar = obec_status.tank_pressure_bar;
       system_status.tank_temperature_celsius = obec_status.tank_temperature_celsius;
       system_status.tank_depress_vent_temperature_celsius = obec_status.tank_depress_vent_temperature_celsius;
       system_status.obec_battery_voltage_volt = obec_status.obec_battery_voltage_volt;
@@ -152,7 +152,7 @@ void loop() {
   switch (system_status.current_state) {
     case STANDBY:
       if (currMilis - last_milis > 100) {
-        if (system_status.tank_pressure_psi > TANK_PRESSURE_WARN_PSI) {
+        if (system_status.tank_pressure_bar > TANK_PRESSURE_WARN_PSI) {
           if (system_status.external_vent_as_default) {
             switch_to_state(STANDBY_PRESSURE_WARNING_EXTERNAL_VENT);
           } else {
@@ -175,7 +175,7 @@ void loop() {
       break;
     case STANDBY_PRESSURE_WARNING:
       if (currMilis - last_milis > 500) {
-        if (system_status.tank_pressure_psi > TANK_PRESSURE_WARN_PSI) {
+        if (system_status.tank_pressure_bar > TANK_PRESSURE_WARN_PSI) {
           if (millis() - standby_pressure_warning_start_time > MAX_PRESSURE_WARNING_TIME_MILLIS) {
             switch_to_state(STANDBY_PRESSURE_WARNING_EXTERNAL_VENT);
           }
@@ -187,7 +187,7 @@ void loop() {
       break;
     case STANDBY_PRESSURE_WARNING_EXTERNAL_VENT:
       if (currMilis - last_milis > 500) {
-        if (system_status.tank_pressure_psi > TANK_PRESSURE_WARN_PSI) {
+        if (system_status.tank_pressure_bar > TANK_PRESSURE_WARN_PSI) {
           if (millis() - standby_pressure_warning_start_time > MAX_PRESSURE_WARNING_TIME_EXT_VENT_MILLIS) {
             switch_to_state(ABORT);
           }
@@ -267,7 +267,7 @@ void switch_to_state(State newState) {
       control_module.execute_valve_command(Command(ValveCommand, Open, LOADING_LINE_DEPRESS_VENT_VALVE));
       break;
     case LOADING:
-      if (system_status.loading_line_pressure_psi < MAX_LOADING_LINE_PRESSURE_PSI && system_status.tank_pressure_psi < TANK_PRESSURE_WARN_PSI) {
+      if (system_status.loading_line_pressure_bar < MAX_LOADING_LINE_PRESSURE_PSI && system_status.tank_pressure_bar < TANK_PRESSURE_WARN_PSI) {
         communication_module.send_valve_command_to_OBEC(Command(ValveCommand, Close, ENGINE_VALVE));
         control_module.execute_valve_command(Command(ValveCommand, Close, LOADING_LINE_DEPRESS_VENT_VALVE));
         communication_module.send_valve_command_to_OBEC(Command(ValveCommand, Open, TANK_DEPRESS_VENT_VALVE));
@@ -282,7 +282,7 @@ void switch_to_state(State newState) {
     case PRE_FLIGHT_CHECK:
       {
         PreflightCheckData preflight_check_data = PreflightCheckData();
-        preflight_check_data.tank_pressure_psi = system_status.tank_pressure_psi;
+        preflight_check_data.tank_pressure_bar = system_status.tank_pressure_bar;
         preflight_check_data.tank_temperature_celsius = system_status.tank_temperature_celsius;
         preflight_check_data.engine_valve_open = system_status.engine_valve_open;
         preflight_check_data.loading_valve_open = system_status.loading_valve_open;
@@ -336,7 +336,7 @@ void switch_to_state(State newState) {
 }
 
 void update_sensor_and_weather_data() {
-  system_status.loading_line_pressure_psi = sensor_module.get_loading_line_pressure_psi();
+  system_status.loading_line_pressure_bar = sensor_module.get_loading_line_pressure_bar();
   system_status.lc_battery_voltage_volt = sensor_module.get_lc_battery_voltage_volt();
   system_status.obec_connection_ok = sensor_module.get_obec_connection_ok();
   system_status.loading_valve_open = sensor_module.get_loading_valve_open();

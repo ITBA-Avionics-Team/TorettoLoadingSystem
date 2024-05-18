@@ -19,12 +19,12 @@ class SensorModule {
     Logger::log("Sensor Module initialized.");
   }
 
-  int get_loading_line_pressure_psi(){
+  int get_loading_line_pressure_bar(){
     // 0 a 250 bar
     return 0;
   }
 
-  int get_ground_tank_presure_psi(){
+  int get_ground_tank_presure_bar(){
     return 0;
   }
 

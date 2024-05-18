@@ -23,7 +23,7 @@ class SimulatedSensorModule {
     Logger::log("Simulated Sensor Module initialized.");
   }
 
-  int get_loading_line_pressure_psi(){
+  int get_loading_line_pressure_bar(){
     return SimulationModule::parse_int_str(simulation_module.sensor_module_return_vals[0]);
   }
 

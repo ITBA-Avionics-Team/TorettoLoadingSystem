@@ -2,7 +2,7 @@
 // class PreflightCheckData {
 
 //   public:
-//   float tank_pressure_psi;
+//   float tank_pressure_bar;
 //   float tank_temperature_celsius;
 //   bool engine_valve_open;
 //   bool loading_valve_open;

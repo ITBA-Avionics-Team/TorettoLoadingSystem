@@ -16,10 +16,10 @@
 // class SystemStatus {
 //   public:
 //   State currentState;
-//   int tank_pressure_psi;
+//   int tank_pressure_bar;
 //   float tank_temperature_celsius;
 //   float tank_depress_vent_temperature_celsius;
-//   int loading_line_pressure_psi;
+//   int loading_line_pressure_bar;
 //   float obec_battery_voltage_volt;
 //   float lc_battery_voltage_volt;
 //   bool obec_connection_ok;
@@ -35,7 +35,7 @@
 
 // class OBECStatus {
 //   public:
-//   int tank_pressure_psi;
+//   int tank_pressure_bar;
 //   float tank_temperature_celsius;
 //   float tank_depress_vent_temperature_celsius;
 //   float obec_battery_voltage_volt;

@@ -152,10 +152,10 @@ class SystemStatus
 
 public:
   State current_state;
-  int tank_pressure_psi;
+  int tank_pressure_bar;
   float tank_temperature_celsius;
   float tank_depress_vent_temperature_celsius;
-  int loading_line_pressure_psi;
+  int loading_line_pressure_bar;
   float obec_battery_voltage_volt;
   float lc_battery_voltage_volt;
   bool obec_connection_ok;
@@ -177,11 +177,11 @@ public:
     char buffer[10];
     Logger::debug("Creating SystemStatus message...");
     String state_str = get_4_byte_string_from_state(status.current_state);
-    sprintf(buffer, "%04d", status.tank_pressure_psi); // 4 is the desired number of digits (using leading zeroes)
+    sprintf(buffer, "%04d", status.tank_pressure_bar); // 4 is the desired number of digits (using leading zeroes)
     String tank_pressure_str(buffer);
     String tank_temperature_str = get_formatted_temp_string(status.tank_temperature_celsius);
     String tank_depress_vent_temperature_celsius_str = get_formatted_temp_string(status.tank_depress_vent_temperature_celsius);
-    sprintf(buffer, "%04d", status.loading_line_pressure_psi); // 4 is the desired number of digits (using leading zeroes)
+    sprintf(buffer, "%04d", status.loading_line_pressure_bar); // 4 is the desired number of digits (using leading zeroes)
     String loading_line_pressure_str(buffer);
     String obec_battery_voltage_str = String(status.obec_battery_voltage_volt, 2);
     String lc_battery_voltage_str = String(status.lc_battery_voltage_volt, 2);
@@ -252,7 +252,7 @@ class OBECStatus
   }
 
 public:
-  int tank_pressure_psi = -1;
+  int tank_pressure_bar = -1;
   float tank_temperature_celsius = -1;
   float tank_depress_vent_temperature_celsius = -1;
   float obec_battery_voltage_volt = -1;
@@ -261,14 +261,14 @@ public:
 
   OBECStatus() {}
 
-  OBECStatus(int tank_pressure_psi_val,
+  OBECStatus(int tank_pressure_bar_val,
              float tank_temperature_celsius_val,
              float tank_depress_vent_temperature_celsius_val,
              float obec_battery_voltage_volt_val,
              bool tank_depress_vent_valve_open_val,
              bool engine_valve_open_val)
   {
-    tank_pressure_psi = tank_pressure_psi_val;
+    tank_pressure_bar = tank_pressure_bar_val;
     tank_temperature_celsius = tank_temperature_celsius_val;
     tank_depress_vent_temperature_celsius = tank_depress_vent_temperature_celsius_val;
     obec_battery_voltage_volt = obec_battery_voltage_volt_val;
@@ -282,7 +282,7 @@ public:
   {
     char buffer[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
     Logger::debug("Creating OBECStatus message...");
-    sprintf(buffer, "%04d", status.tank_pressure_psi); // 4 is the desired number of digits (using leading zeroes)
+    sprintf(buffer, "%04d", status.tank_pressure_bar); // 4 is the desired number of digits (using leading zeroes)
     String tank_pressure_str(buffer);
     String tank_temperature_str = String(status.tank_temperature_celsius, 1);
     String tank_depress_vent_temperature_str = String(status.tank_depress_vent_temperature_celsius, 1);
@@ -311,7 +311,7 @@ public:
   }
   static bool is_empty(OBECStatus status)
   { // TODO: We should create some king of static OBECStatus::EMPTY constant
-    return status.tank_pressure_psi == -1 &&
+    return status.tank_pressure_bar == -1 &&
            status.tank_temperature_celsius == -1 &&
            status.tank_depress_vent_temperature_celsius == -1 &&
            status.obec_battery_voltage_volt == -1 &&
@@ -527,7 +527,7 @@ class PreflightCheckData
 {
 
 public:
-  float tank_pressure_psi;
+  float tank_pressure_bar;
   float tank_temperature_celsius;
   bool engine_valve_open;
   bool loading_valve_open;
