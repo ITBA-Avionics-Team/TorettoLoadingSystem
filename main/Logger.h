@@ -7,14 +7,14 @@
 class Logger {
   static const bool errorActivated = false;
   static const bool debugActivated = false;
-  static const bool logActivated = false;
+  static const bool logActivated = true;
 
   public:
     static void error(float value) {
       if (errorActivated) {
         Serial.print("[Error] ");
         Serial.println(value);
-        //OLEDModule::printText("[Error] " + String(value));
+        // OLEDModule::printText("[Error] " + String(value));
       }
     }
 
@@ -22,7 +22,7 @@ class Logger {
       if (errorActivated) {
         Serial.print("[Error] ");
         Serial.println(message);
-        //OLEDModule::printText("[Error] " + message);
+        // OLEDModule::printText("[Error] " + message);
       }
     }
 
@@ -30,7 +30,7 @@ class Logger {
       if (debugActivated) {
         Serial.print("[Debug] ");
         Serial.println(value);
-        //OLEDModule::printText("[Debug] " + String(value));
+        // OLEDModule::printText("[Debug] " + String(value));
       }
     }
 
@@ -38,7 +38,7 @@ class Logger {
       if (debugActivated) {
         Serial.print("[Debug] ");
         Serial.println(message);
-        //OLEDModule::printText("[Debug] " + message);
+        // OLEDModule::printText("[Debug] " + message);
       }
     }
 
@@ -47,7 +47,7 @@ class Logger {
         Serial.print("[Log] ");
         Serial.println(value);
       }
-      //OLEDModule::printText("[Log] " + String(value));
+      // OLEDModule::printText("[Log] " + String(value));
     }
 
     static void log(String message) {
@@ -55,7 +55,7 @@ class Logger {
         Serial.print("[Log] ");
         Serial.println(message);
       }
-      //OLEDModule::printText(message);
+      // OLEDModule::printText(message);
     }
 
 

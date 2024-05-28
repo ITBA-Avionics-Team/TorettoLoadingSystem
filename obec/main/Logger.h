@@ -7,7 +7,7 @@
 class Logger {
   static const bool errorActivated = false;
   static const bool debugActivated = false;
-  static const bool logActivated = false;
+  static const bool logActivated = true;
 
   public:
     static void error(float value) {

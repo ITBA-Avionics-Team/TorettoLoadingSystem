@@ -29,9 +29,10 @@ unsigned long simulation_mode_update_millis = 0;
 SimulationModule simulation_module = SimulationModule();
 #endif
 
+SimulatedValveStatus simulated_valve_status = SimulatedValveStatus();
 
 #include "modules/ControlModule.h"
-ControlModule control_module = ControlModule();
+ControlModule control_module = ControlModule(simulated_valve_status);
 
 #ifdef SIMULATED_SENSOR_MODULE
 #include "simulation_modules/SimulatedSensorModule.h"

@@ -62,7 +62,7 @@ class CommunicationModule {
     }
 
     void send_valve_command_to_OBEC(Command command) {
-      // obec_communication.send_valve_command(command);
+      obec_communication.send_valve_command(command);
     }
 
     void send_abort_signal_to_OBEC() {

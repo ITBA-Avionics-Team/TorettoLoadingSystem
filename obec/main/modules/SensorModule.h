@@ -6,11 +6,13 @@
 
 class SensorModule
 {
+  SimulatedValveStatus& simulated_valve_status;
 public:
+  SensorModule(SimulatedValveStatus& simulated_valve_status_val) : simulated_valve_status(simulated_valve_status_val) {}
+  
   void init()
   {
     Logger::log("Initializing sensor Module...");
-
     Logger::log("Sensor Module initialized.");
   }
 
@@ -36,11 +38,11 @@ public:
 
   bool get_tank_depres_vent_valve_open()
   {
-    return true; // TODO: Implement
+    return simulated_valve_status.tank_depres_vent_valve_open;
   }
 
   bool get_engine_valve_open()
   {
-    return true; // TODO: Implement
+    return simulated_valve_status.engine_valve_open;
   }
 };

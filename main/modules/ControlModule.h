@@ -7,16 +7,19 @@
 #include <ESP32Servo.h>
 
 #define LOADING_VALVE_PIN 14 // Relé (high low)
-#define LOADING_LINE_DEPRESS_VENT_VALVE_PIN 13 // Servo
+#define LOADING_LINE_DEPRESS_VENT_VALVE_PIN 33 // Servo
 #define NOX_UMBRILICAL_PIN 27 // Relé (high low)
-#define IGNITERS_PIN 33 // Relé (high low)
+#define IGNITERS_PIN 13 // Relé (high low)
 
 class ControlModule {
-  
 
+  SimulatedValveStatus& simulated_valve_status;
+  
   public:
 
     Servo loadingValveServo;
+
+    ControlModule(SimulatedValveStatus& simulated_valve_status_val) : simulated_valve_status(simulated_valve_status_val) {}
 
     void init() {
       // Allow allocation of all timers
@@ -26,9 +29,8 @@ class ControlModule {
       ESP32PWM::allocateTimer(3);
       loadingValveServo.setPeriodHertz(50);    // standard 50 hz servo
       loadingValveServo.attach(LOADING_LINE_DEPRESS_VENT_VALVE_PIN, 1000, 2000); // attaches the servo on pin 18 to the servo object
-      loadingValveServo.write(60);
+      loadingValveServo.write(90);
       delay(500);
-      loadingValveServo.write(180);
 
       pinMode(LOADING_VALVE_PIN, OUTPUT);
       pinMode(NOX_UMBRILICAL_PIN, OUTPUT);
@@ -43,16 +45,16 @@ class ControlModule {
     }
 
     void execute_valve_command(Command command) {
-      // Logger::debug("ControlModule.execute_valve_command" + String(command.valve));
+      char uint_string[4];
+      sprintf(uint_string, "%d", command.uint_value);
+      Logger::debug("ControlModule.execute_valve_command: " + String(command.valve) + " " + String(uint_string));
       // move_loading_valve_servo(command.uint_value);
       switch (command.valve) {
         case LOADING_VALVE:
           move_loading_valve_relay(command.uint_value);
           break;
         case LOADING_LINE_DEPRESS_VENT_VALVE:
-          move_loading_valve_servo(command.uint_value);
-          break;
-        default:
+          move_loading_line_depress_vent_valve_servo(command.uint_value);
           break;
       }
     }
@@ -74,14 +76,16 @@ class ControlModule {
 
     void move_loading_valve_relay(uint8_t value) {
       digitalWrite(LOADING_VALVE_PIN, value > 127.5 ? HIGH : LOW);
+      simulated_valve_status.loading_valve_open = value > 127.5;
+    }
+
+    void move_loading_line_depress_vent_valve_servo(uint8_t value) {
+      loadingValveServo.write(180 * (value / 255));
+      simulated_valve_status.loading_depress_vent_valve_open = value > 127.5;
     }
 
     void move_umbrilical_relay(uint8_t value) {
       digitalWrite(NOX_UMBRILICAL_PIN, value > 127.5 ? HIGH : LOW);
-    }
-
-    void move_loading_valve_servo(uint8_t value) {
-      loadingValveServo.write(180);
     }
 
 };

@@ -1,12 +1,13 @@
+#define LED_PIN 25
 #ifndef LOGGER_H
 #define LOGGER_H
 #include "Logger.h"
 #endif // LOGGER_H
 
-#ifndef OLED_H
-#define OLED_H
-#include "OLEDModule.h"
-#endif // OLED_H
+// #ifndef OLED_H
+// #define OLED_H
+// #include "OLEDModule.h"
+// #endif // OLED_H
 
 #define SIMULATION_MODULE true
 // #define SIMULATED_SENSOR_MODULE true
@@ -48,8 +49,10 @@ unsigned long ignition_start_time = 0;
 SimulationModule simulation_module = SimulationModule();
 #endif
 
+SimulatedValveStatus simulated_valve_status = SimulatedValveStatus();
+
 StorageModule storage_module = StorageModule();
-ControlModule control_module = ControlModule();
+ControlModule control_module = ControlModule(simulated_valve_status);
 
 
 #ifdef SIMULATED_SENSOR_MODULE
@@ -57,7 +60,7 @@ ControlModule control_module = ControlModule();
 SimulatedSensorModule sensor_module = SimulatedSensorModule(simulation_module);
 #else
 #include "modules/SensorModule.h"
-SensorModule sensor_module = SensorModule();
+SensorModule sensor_module = SensorModule(simulated_valve_status);
 #endif
 
 
@@ -71,19 +74,29 @@ CommunicationModule communication_module = CommunicationModule();
 
 WeatherModule weather_module = WeatherModule();
 
-#define LED_PIN 2
+
 
 void setup()
 {
-  Serial.begin(115200);
+  Serial.begin(115200, SERIAL_8N1, 3, 1);
 
-  //OLEDModule::init();
-  pinMode(LED_PIN, OUTPUT);
+pinMode(LED_PIN, OUTPUT);
+
+  digitalWrite(LED_PIN, HIGH);
+  delay(500);
+  digitalWrite(LED_PIN, LOW);
+  delay(500);
+  digitalWrite(LED_PIN, HIGH);
+  delay(500);
+  digitalWrite(LED_PIN, LOW);
+  delay(500);
+  // OLEDModule::init();
+  
 
   storage_module.init();
   control_module.init();
   sensor_module.init();
-  // electromechanical_module.init();
+  // electromechanical_modul  e.init();
   // communication_module.init();
 
   last_milis = millis();
@@ -113,7 +126,7 @@ void loop() {
       switch (command.type) {
         case ValveCommand:
           if (is_LC_valve(command.valve)) {
-            digitalWrite(LED_PIN, HIGH);
+            // digitalWrite(LED_PIN, HIGH);
             control_module.execute_valve_command(command);
           } else {
             communication_module.send_valve_command_to_OBEC(command);
@@ -344,4 +357,5 @@ void update_sensor_and_weather_data() {
   system_status.hydraulic_umbrilical_connected = sensor_module.get_hydraulic_umbrilical_connected();
   system_status.igniter_continuity_ok = sensor_module.get_igniter_continuity_ok();
   system_status.wind_kt = weather_module.get_wind_kt();
+  system_status.tank_temperature_celsius = sensor_module.get_tank_temperature_celsius();
 }
