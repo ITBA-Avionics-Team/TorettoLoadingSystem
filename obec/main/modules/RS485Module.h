@@ -6,23 +6,30 @@
 class RS485Module {
   char serial_buffer[30];
   public:
-
     RS485Module() {
       Serial2.begin(115200, SERIAL_8N1, RS485_RX_PIN, RS485_TX_PIN);
       pinMode(RS485_SET_TX_PIN, OUTPUT);
       pinMode(RS485_SET_RX_PIN, OUTPUT);
-      digitalWrite(RS485_SET_TX_PIN, HIGH); // We set ourselves as the transmitter 
-      digitalWrite(RS485_SET_RX_PIN, LOW); // We set ourselves as the transmitter 
+      digitalWrite(RS485_SET_TX_PIN, LOW); // We set ourselves as the receiver 
+      digitalWrite(RS485_SET_RX_PIN, LOW); // We set ourselves as the receiver 
     }
 
     Command check_for_commands() {
       // digitalWrite(RS485_SET_TX_PIN, LOW); // We set ourselves as the receiver 
-      // if (Serial2.available()) {
-      //       int message_len = Serial.readBytesUntil('|', serial_buffer, 30);
-      //       String message = String(serial_buffer).substring(0, message_len);
-      //       return Command::from_message(message);
-      // }
-      // return Command(EMPTY);
+      Logger::log("Checking for commands...");
+      if (Serial2.available()) {
+        digitalWrite(LED_PIN, HIGH);
+          delay(800);
+          digitalWrite(LED_PIN, LOW);
+        // Logger::log("Received command.");
+        int message_len = Serial2.readBytesUntil('|', serial_buffer, 30);
+        String message = String(serial_buffer).substring(0, message_len);
+        Logger::log("Received command: " + message);
+        Logger::log("Length: " + String(message_len));
+        if (message_len == 7) // We only want to parse the message if it was a complete system status message
+          return Command::from_message(message);
+      }
+      return Command(EMPTY);
     }
 
     void send_system_status(OBECStatus system_status) {

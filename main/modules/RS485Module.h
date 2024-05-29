@@ -10,8 +10,8 @@ class RS485Module {
       Serial2.begin(115200, SERIAL_8N1, RS485_RX_PIN, RS485_TX_PIN);
       pinMode(RS485_SET_TX_PIN, OUTPUT);
       pinMode(RS485_SET_RX_PIN, OUTPUT);
-      digitalWrite(RS485_SET_TX_PIN, HIGH); // We are the receiver, so we set TX to HIGH
-      digitalWrite(RS485_SET_RX_PIN, LOW); // We are the receiver, so we set RX to LOW
+      digitalWrite(RS485_SET_TX_PIN, HIGH); // We set ourselves as the transamitter
+      digitalWrite(RS485_SET_RX_PIN, HIGH); // We set ourselves as the transamitter
     }
 
     OBECStatus check_for_status_message() {
@@ -30,9 +30,11 @@ class RS485Module {
     }
 
     void send_valve_command(Command command) {
-      Logger::log(String("Sending valve command to  OBEC."));
-      String command_msg = Command::to_message(command) + String("|");
+      
+      String command_msg = Command::to_message(command);
+      
       Serial2.print(command_msg);
+      Logger::log(String("Sending valve command to  OBEC:" + command_msg));
     }
 };
 

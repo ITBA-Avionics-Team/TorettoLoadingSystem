@@ -1,3 +1,4 @@
+#define LED_PIN 25
 #ifndef LOGGER_H
 #define LOGGER_H
 #include "Logger.h"
@@ -53,7 +54,7 @@ CommunicationModule communication_module = CommunicationModule();
 
 void setup()
 {
-  Serial.begin(115200);
+  Serial.begin(115200, SERIAL_8N1, 3, 1);
 
   sensor_module.init();
   control_module.init();
@@ -74,7 +75,7 @@ void loop()
 #endif
 
   if (currMilis - last_lc_update_milis > 300) {
-    // communication_module.check_for_LC_commands();
+    communication_module.check_for_LC_commands();
   
     if (communication_module.new_LC_command_available) {
       control_module.execute_valve_command(communication_module.latest_LC_command);
