@@ -11,6 +11,7 @@ enum State
   PRE_FLIGHT_CHECK,
   PRE_LAUNCH_WIND_CHECK,
   PRE_LAUNCH_UMBRILICAL_DISCONNECT,
+  IGNITION_BLEED_VALVE,
   IGNITION_IGNITERS_ON,
   IGNITION_OPEN_VALVE,
   IGNITION_IGNITERS_OFF,
@@ -35,6 +36,8 @@ String get_4_byte_string_from_state(State state)
     return "PRLW";
   case PRE_LAUNCH_UMBRILICAL_DISCONNECT:
     return "PRLU";
+  case IGNITION_BLEED_VALVE:
+    return "IGBL";
   case IGNITION_IGNITERS_ON:
     return "IGON";
   case IGNITION_OPEN_VALVE:
@@ -70,6 +73,9 @@ State get_state_from_4_byte_string(String state_str)
   else if (state_str.equals("PRLU")) {
     return PRE_LAUNCH_UMBRILICAL_DISCONNECT;
   } 
+  else if (state_str.equals("IGBL")) {
+    return IGNITION_BLEED_VALVE;
+  }
   else if (state_str.equals("IGON")) {
     return IGNITION_IGNITERS_ON;
   } 
@@ -103,6 +109,8 @@ String get_state_complete_string(State state)
     return "PRE_LAUNCH_WIND_CHECK";
   case PRE_LAUNCH_UMBRILICAL_DISCONNECT:
     return "PRE_LAUNCH_UMBRILICAL_DISCONNECT";
+  case IGNITION_BLEED_VALVE:
+    return "IGNITION_BLEED_VALVE";
   case IGNITION_IGNITERS_ON:
     return "IGNITION_IGNITERS_ON";
   case IGNITION_OPEN_VALVE:

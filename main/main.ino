@@ -231,27 +231,21 @@ void loop() {
           break;
         }
         if (currMilis - umbrilical_disconnect_time > 10000) {
-          switch_to_state(IGNITION_IGNITERS_ON);
+          switch_to_state(IGNITION_BLEED_VALVE);
         }
       }
       break;
+    case IGNITION_BLEED_VALVE:
+      if (currMilis - ignition_start_time > 1000) {
+          switch_to_state(IGNITION_IGNITERS_ON);
+      }
+      break;
     case IGNITION_IGNITERS_ON:
-      if (currMilis - ignition_start_time > 500) {
+      if (currMilis - ignition_start_time > 4000) {
         switch_to_state(IGNITION_OPEN_VALVE);
       }
     case IGNITION_OPEN_VALVE:
-      if (currMilis - ignition_start_time < 3000) {
-        communication_module.send_valve_command_to_OBEC(Command(ValveCommand, Open, ENGINE_VALVE));  // TODO: I think we should open this valve gradually, which implies a modification of the ValveComand structure.
-        // Value between 0 and 255 would look something like
-        // (((currMilis - ignition_start_time) - 500) / 2500) * 255
-        // We might want to make this discrete by using last_milis like we do in other states.
-        
-        // Open bleed 3% for 1000ms (1 seconds) before igniters
-        // Igniters on for 3 seconds
-        // Open 100% and leave open
-        // 1 second later Igniters off total 4 secs of gniters
-
-      } else {
+      if (currMilis - ignition_start_time > 5000) {
         switch_to_state(IGNITION_IGNITERS_OFF);
       }
       break;
@@ -327,11 +321,18 @@ void switch_to_state(State newState) {
       control_module.disconnect_umbrilical();
       umbrilical_disconnect_time = millis();
       break;
+    case IGNITION_BLEED_VALVE:
+      ignition_start_time = millis();
+      communication_module.send_valve_command_to_OBEC(Command(ValveCommand, 0.3 * 255, ENGINE_VALVE)); //  TODO: VERIFY CORRECT FUNCTIONALITY OF PARTIAL OPEN
+      break;
     case IGNITION_IGNITERS_ON:
       control_module.set_igniters_on(true);
-      ignition_start_time = millis();
+      break;
+    case IGNITION_OPEN_VALVE:
+      communication_module.send_valve_command_to_OBEC(Command(ValveCommand, Open, ENGINE_VALVE));
       break;
     case IGNITION_IGNITERS_OFF:
+      control_module.set_igniters_on(false);
       communication_module.send_ignition_confirmation_to_OBEC();
       communication_module.send_ignition_confirmation_to_MCC();
       break;
