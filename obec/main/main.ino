@@ -22,6 +22,7 @@
 OBECStatus system_status = OBECStatus();
 unsigned long last_milis = 0;
 unsigned long last_lc_update_milis = 0;
+unsigned long last_lc_command_check_milis = 0;
 unsigned long simulation_mode_update_millis = 0;
 
 // Modules
@@ -75,8 +76,6 @@ void loop()
 #endif
 
   if (currMilis - last_lc_update_milis > 300) {
-    communication_module.check_for_LC_commands();
-  
     if (communication_module.new_LC_command_available) {
       control_module.execute_valve_command(communication_module.latest_LC_command);
       communication_module.new_LC_command_available = false;
@@ -87,6 +86,9 @@ void loop()
     communication_module.send_system_status_to_LC(system_status);
 
     last_lc_update_milis = currMilis;
+  } else if (currMilis - last_lc_command_check_milis > 100) {
+    communication_module.check_for_LC_commands();
+    last_lc_command_check_milis = currMilis;
   }
 
 }

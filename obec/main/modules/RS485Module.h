@@ -10,8 +10,17 @@ class RS485Module {
       Serial2.begin(115200, SERIAL_8N1, RS485_RX_PIN, RS485_TX_PIN);
       pinMode(RS485_SET_TX_PIN, OUTPUT);
       pinMode(RS485_SET_RX_PIN, OUTPUT);
-      digitalWrite(RS485_SET_TX_PIN, LOW); // We set ourselves as the receiver 
-      digitalWrite(RS485_SET_RX_PIN, LOW); // We set ourselves as the receiver 
+      setToTransmitMode();
+    }
+
+    void setToTransmitMode() {
+      digitalWrite(RS485_SET_TX_PIN, HIGH); // We set ourselves as the transamitter
+      digitalWrite(RS485_SET_RX_PIN, HIGH); // We set ourselves as the transamitter
+    }
+
+    void setToReceiveMode() {
+      digitalWrite(RS485_SET_TX_PIN, LOW); // We set ourselves as the receiver
+      digitalWrite(RS485_SET_RX_PIN, LOW); // We set ourselves as the receiver
     }
 
     Command check_for_commands() {
@@ -33,9 +42,11 @@ class RS485Module {
     }
 
     void send_system_status(OBECStatus system_status) {
-      // digitalWrite(RS485_SET_TX_PIN, HIGH); // We set ourselves as the transmitter 
+      setToTransmitMode();
       String system_status_msg = OBECStatus::to_message(system_status) + String("|");
       Serial2.print(system_status_msg);
+      delay(5);
+      setToReceiveMode();
       // Serial.print(system_status_msg);
       Logger::log("Sending" + system_status_msg);
     }

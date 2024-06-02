@@ -17,8 +17,8 @@ void setup() {
   pinMode(ENABLE_TX_PIN, OUTPUT);
   pinMode(ENABLE_RX_PIN, OUTPUT);
   pinMode(LED_PIN, OUTPUT);
-  digitalWrite(ENABLE_TX_PIN, HIGH);   // We are the receiver, so we set TX to HIGH
-  digitalWrite(ENABLE_RX_PIN, LOW);  // We are the receiver, so we set RX to LOW
+  digitalWrite(ENABLE_TX_PIN, LOW);   // We are the receiver
+  digitalWrite(ENABLE_RX_PIN, LOW);  // We are the receiver
   last_millis = millis();
 }
 
