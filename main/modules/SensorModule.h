@@ -15,6 +15,8 @@
 #define UMBRILICAL_CONNECTED_PIN 34
 #define UMBRILICAL_FINISHED_DISCONNECT_PIN 35
 
+#define UMBRILICAL_VOLTAGE_TOLERANCE_EPSILON 0.3
+
 #define REFERENCE_VOLTAGE 3.3
 #define MAX_PRESSURE_VALUE_BAR 250
 
@@ -87,11 +89,11 @@ class SensorModule {
   }
 
   bool get_hydraulic_umbrilical_connected() {
-    return digitalRead(UMBRILICAL_CONNECTED_PIN) == HIGH;
+    return digitalRead(UMBRILICAL_CONNECTED_PIN) > HIGH - UMBRILICAL_VOLTAGE_TOLERANCE_EPSILON;
   }
 
     bool get_hydraulic_umbrilical_finished_disconnect() {
-    return digitalRead(UMBRILICAL_FINISHED_DISCONNECT_PIN) == HIGH;
+    return digitalRead(UMBRILICAL_FINISHED_DISCONNECT_PIN) > HIGH - UMBRILICAL_VOLTAGE_TOLERANCE_EPSILON;
   }
 
   bool get_igniter_continuity_ok(){
