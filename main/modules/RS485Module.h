@@ -1,7 +1,5 @@
-#define RS485_RX_PIN 16
-#define RS485_TX_PIN 17
-#define RS485_SET_TX_PIN 5
-#define RS485_SET_RX_PIN 18
+#define RS485_SET_TX_PIN 22
+#define RS485_SET_RX_PIN 22
 
 class RS485Module {
   char serial_buffer[30];
@@ -9,7 +7,7 @@ class RS485Module {
   String command_queue = "";
   public:
     RS485Module() {
-      Serial2.begin(115200, SERIAL_8N1, RS485_RX_PIN, RS485_TX_PIN);
+      // Serial.begin(115200, SERIAL_8N1, RS485_RX_PIN, RS485_TX_PIN);
       pinMode(RS485_SET_TX_PIN, OUTPUT);
       pinMode(RS485_SET_RX_PIN, OUTPUT);
       setToReceiveMode();
@@ -26,11 +24,11 @@ class RS485Module {
     }
 
     OBECStatus check_for_status_message() {
-      if (Serial2.available()) {
+      if (Serial.available()) {
           digitalWrite(LED_PIN, HIGH);
           delay(800);
           digitalWrite(LED_PIN, LOW);
-          int message_len = Serial2.readBytesUntil('|', serial_buffer, 30);
+          int message_len = Serial.readBytesUntil('|', serial_buffer, 30);
           String message = String(serial_buffer).substring(0, message_len);
           Logger::log(String("Received status from OBEC:" + message));
           // Logger::log(String("Length " + String(message_len)));
@@ -46,7 +44,7 @@ class RS485Module {
 
     void send_valve_command_from_queue() {
       setToTransmitMode();
-      Serial2.print(command_queue);
+      Serial.print(command_queue);
       Logger::log(String("Sending valve command to  OBEC:" + command_queue));
       command_queue = "";
       delay(5);

@@ -16,17 +16,22 @@
 
 #define PACKET_COUNT_EEPROM_ADDR 4
 
+#define RS485_RX_PIN 16
+#define RS485_TX_PIN 17
 
-#define XBEE_RST_PIN 22
 
 class XBeeModule {
   char serial_buffer[30];
   public:
 
+    XBeeModule() {
+      Serial2.begin(115200, SERIAL_8N1, RS485_RX_PIN, RS485_TX_PIN);
+    }
+
     Command check_for_commands(){
       // digitalWrite(RS485_SET_TX_PIN, LOW); // We set ourselves as the receiver 
-      if (Serial.available()) {
-            int message_len = Serial.readBytesUntil('|', serial_buffer, 30);
+      if (Serial2.available()) {
+            int message_len = Serial2.readBytesUntil('|', serial_buffer, 30);
             String message = String(serial_buffer).substring(0, message_len);
             return Command::from_message(message);
       }
@@ -37,7 +42,7 @@ class XBeeModule {
       // digitalWrite(RS485_SET_TX_PIN, HIGH); // We set ourselves as the transmitter 
       
       String system_status_msg = SystemStatus::to_message(system_status) + String("|");
-      Serial.println(system_status_msg);
+      Serial2.println(system_status_msg);
       // Logger::log(String("Sending system status message to MCC ") + system_status_msg);
     }
 
@@ -45,22 +50,22 @@ class XBeeModule {
     }
 
     void send_tank_depress_vent_temp_low() {
-      Serial.print("TDVTL|");
+      Serial2.print("TDVTL|");
     }
 
     void send_wind_abort() {
-      Serial.print("WABRT|");
+      Serial2.print("WABRT|");
     }
 
     void send_umbrilical_abort() {
-      Serial.print("UABRT|");
+      Serial2.print("UABRT|");
     }
 
     void send_external_vent_as_default_prompt(){
-      Serial.print("EXTVD|");
+      Serial2.print("EXTVD|");
     }
 
     void send_ignition_confirmation() {
-      Serial.print("IGNCO|");
+      Serial2.print("IGNCO|");
     }
 };
