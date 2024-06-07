@@ -23,13 +23,7 @@ class ControlModule {
 
     void init() {
       // Allow allocation of all timers
-      ESP32PWM::allocateTimer(0);
-      ESP32PWM::allocateTimer(1);
-      ESP32PWM::allocateTimer(2);
-      ESP32PWM::allocateTimer(3);
-      loadingValveServo.setPeriodHertz(50);    // standard 50 hz servo
-      loadingValveServo.attach(LOADING_LINE_DEPRESS_VENT_VALVE_PIN, 1000, 2000); // attaches the servo on pin 18 to the servo object
-      loadingValveServo.write(90);
+        
       delay(500);
 
       pinMode(LOADING_VALVE_PIN, OUTPUT);
@@ -66,7 +60,6 @@ class ControlModule {
 
     void set_igniters_on(bool value) {
       Logger::debug("Control.set_igniters_on" + value);
-
     }
     
     void disconnect_umbrilical() {

@@ -4,6 +4,12 @@
 #include "Logger.h"
 #endif // LOGGER_H
 
+#define TANK_DEPRESSS_VENT_TEMPERATURE_SPI_SCK 15
+#define TANK_DEPRESSS_VENT_TEMPERATURE_SPI_CS 2
+#define TANK_DEPRESSS_VENT_TEMPERATURE_SPI_S0 4
+
+#define BATTERY_VOLTAGE_PIN 35
+
 class SensorModule
 {
   SimulatedValveStatus& simulated_valve_status;
@@ -13,6 +19,9 @@ public:
   void init()
   {
     Logger::log("Initializing sensor Module...");
+    pinMode(TANK_TEMPERATURE_SPI_CS, OUTPUT);
+    pinMode(TANK_TEMPERATURE_SPI_S0, INPUT);
+    pinMode(TANK_TEMPERATURE_SPI_SCK, OUTPUT);
     Logger::log("Sensor Module initialized.");
   }
 
@@ -28,12 +37,37 @@ public:
 
   float get_tank_depres_vent_temperature_celsius()
   {
-    return 0;
+    uint16_t v;
+    digitalWrite(TANK_TEMPERATURE_SPI_CS, LOW);
+    delay(1);
+
+    // Read in 16 bits,
+    //  15    = 0 always
+    //  14..2 = 0.25 degree counts MSB First
+    //  2     = 1 if thermocouple is open circuit
+    //  1..0  = uninteresting status
+
+    v = shiftIn(TANK_TEMPERATURE_SPI_S0, TANK_TEMPERATURE_SPI_SCK, MSBFIRST);
+    v <<= 8;
+    v |= shiftIn(TANK_TEMPERATURE_SPI_S0, TANK_TEMPERATURE_SPI_SCK, MSBFIRST);
+
+    digitalWrite(TANK_TEMPERATURE_SPI_CS, HIGH);
+    if (v & 0x4)
+    {
+        // Bit 2 indicates if the thermocouple is disconnected
+        return NAN;
+    }
+
+    // The lower three bits (0,1,2) are discarded status bits
+    v >>= 3;
+
+    // The remaining bits are the number of 0.25 degree (C) counts
+    return v * 0.25;
   }
 
   float get_obec_battery_voltage_volt()
   {
-    return 0;
+    return digitalRead(BATTERY_VOLTAGE_PIN);
   }
 
   bool get_tank_depres_vent_valve_open()
