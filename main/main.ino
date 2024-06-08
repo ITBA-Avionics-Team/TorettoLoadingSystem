@@ -1,4 +1,3 @@
-#define LED_PIN 25
 #ifndef LOGGER_H
 #define LOGGER_H
 #include "Logger.h"
@@ -9,7 +8,7 @@
 // #include "OLEDModule.h"
 // #endif // OLED_H
 
-#define SIMULATION_MODULE true
+// #define SIMULATION_MODULE true
 // #define SIMULATED_SENSOR_MODULE true
 // #define SIMULATED_COMMUNICATION_MODULE true
 
@@ -80,19 +79,8 @@ void setup()
 {
   Serial.begin(115200, SERIAL_8N1, 3, 1);
 
-pinMode(LED_PIN, OUTPUT);
-
-  digitalWrite(LED_PIN, HIGH);
-  delay(500);
-  digitalWrite(LED_PIN, LOW);
-  delay(500);
-  digitalWrite(LED_PIN, HIGH);
-  delay(500);
-  digitalWrite(LED_PIN, LOW);
-  delay(500);
-  // OLEDModule::init();
+  Logger::blink_debug_led_times(2);
   
-
   storage_module.init();
   control_module.init();
   sensor_module.init();

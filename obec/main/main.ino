@@ -10,8 +10,8 @@
 #include "TorettoLib.h"
 #endif // TORETTOLIB_H
 
-#define SIMULATION_MODULE true
-#define SIMULATED_SENSOR_MODULE true
+// #define SIMULATION_MODULE true
+// #define SIMULATED_SENSOR_MODULE true
 // #define SIMULATED_COMMUNICATION_MODULE true
 
 #include <stdint.h>
@@ -41,7 +41,7 @@ ControlModule control_module = ControlModule(simulated_valve_status);
 SimulatedSensorModule sensor_module = SimulatedSensorModule(simulation_module);
 #else
 #include "modules/SensorModule.h"
-SensorModule sensor_module = SensorModule();
+SensorModule sensor_module = SensorModule(simulated_valve_status);
 #endif
 
 

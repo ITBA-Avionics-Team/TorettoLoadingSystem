@@ -38,7 +38,7 @@ public:
     return SimulationModule::parse_float_str(simulation_module.sensor_module_return_vals[3]);
   }
 
-  bool get_tank_depres_vent_valve_open()
+  bool get_tank_depress_vent_valve_open()
   {
     return SimulationModule::parse_bool_str(simulation_module.sensor_module_return_vals[4]);
   }

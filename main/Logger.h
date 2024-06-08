@@ -3,6 +3,7 @@
 // #include "OLEDModule.h"
 // #endif // OLED_H
 #include <stdint.h>
+#define LED_PIN 25
 
 class Logger {
   static const bool errorActivated = false;
@@ -58,5 +59,14 @@ class Logger {
       // OLEDModule::printText(message);
     }
 
+    static void blink_debug_led_times(int numOfTimes) {
+      pinMode(LED_PIN, OUTPUT);
+      for (int i = 0; i < numOfTimes; i++){
+        digitalWrite(LED_PIN, HIGH);
+        delay(300);
+        digitalWrite(LED_PIN, LOW);
+        delay(300);
+      }
+    }
 
 };

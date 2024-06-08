@@ -7,7 +7,7 @@ class RS485Module {
   String command_queue = "";
   public:
     RS485Module() {
-      // Serial.begin(115200, SERIAL_8N1, RS485_RX_PIN, RS485_TX_PIN);
+      Serial.begin(115200, SERIAL_8N1, RS485_RX_PIN, RS485_TX_PIN);
       pinMode(RS485_SET_TX_PIN, OUTPUT);
       pinMode(RS485_SET_RX_PIN, OUTPUT);
       setToReceiveMode();
@@ -25,19 +25,17 @@ class RS485Module {
 
     OBECStatus check_for_status_message() {
       if (Serial.available()) {
-          digitalWrite(LED_PIN, HIGH);
-          delay(800);
-          digitalWrite(LED_PIN, LOW);
-          int message_len = Serial.readBytesUntil('|', serial_buffer, 30);
-          String message = String(serial_buffer).substring(0, message_len);
-          Logger::log(String("Received status from OBEC:" + message));
-          // Logger::log(String("Length " + String(message_len)));
-          if (message_len == 18) { // We only want to parse the message if it was a complete system status message
-            if (command_queue.length() != 0)
-              delay(5);
-              send_valve_command_from_queue();
-            return OBECStatus::from_message(message);
-          }
+        Logger::blink_debug_led_times(1);
+        int message_len = Serial.readBytesUntil('|', serial_buffer, 30);
+        String message = String(serial_buffer).substring(0, message_len);
+        Logger::log(String("Received status from OBEC:" + message));
+        // Logger::log(String("Length " + String(message_len)));
+        if (message_len == 18) { // We only want to parse the message if it was a complete system status message
+          if (command_queue.length() != 0)
+            delay(5);
+            send_valve_command_from_queue();
+          return OBECStatus::from_message(message);
+        }
       }
       return OBECStatus(-1, -1, -1, -1, false, false);
     }

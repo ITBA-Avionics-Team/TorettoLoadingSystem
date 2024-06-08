@@ -19,9 +19,9 @@ public:
   void init()
   {
     Logger::log("Initializing sensor Module...");
-    pinMode(TANK_TEMPERATURE_SPI_CS, OUTPUT);
-    pinMode(TANK_TEMPERATURE_SPI_S0, INPUT);
-    pinMode(TANK_TEMPERATURE_SPI_SCK, OUTPUT);
+    pinMode(TANK_DEPRESSS_VENT_TEMPERATURE_SPI_CS, OUTPUT);
+    pinMode(TANK_DEPRESSS_VENT_TEMPERATURE_SPI_S0, INPUT);
+    pinMode(TANK_DEPRESSS_VENT_TEMPERATURE_SPI_SCK, OUTPUT);
     Logger::log("Sensor Module initialized.");
   }
 
@@ -38,7 +38,7 @@ public:
   float get_tank_depres_vent_temperature_celsius()
   {
     uint16_t v;
-    digitalWrite(TANK_TEMPERATURE_SPI_CS, LOW);
+    digitalWrite(TANK_DEPRESSS_VENT_TEMPERATURE_SPI_CS, LOW);
     delay(1);
 
     // Read in 16 bits,
@@ -47,11 +47,11 @@ public:
     //  2     = 1 if thermocouple is open circuit
     //  1..0  = uninteresting status
 
-    v = shiftIn(TANK_TEMPERATURE_SPI_S0, TANK_TEMPERATURE_SPI_SCK, MSBFIRST);
+    v = shiftIn(TANK_DEPRESSS_VENT_TEMPERATURE_SPI_S0, TANK_DEPRESSS_VENT_TEMPERATURE_SPI_SCK, MSBFIRST);
     v <<= 8;
-    v |= shiftIn(TANK_TEMPERATURE_SPI_S0, TANK_TEMPERATURE_SPI_SCK, MSBFIRST);
+    v |= shiftIn(TANK_DEPRESSS_VENT_TEMPERATURE_SPI_S0, TANK_DEPRESSS_VENT_TEMPERATURE_SPI_SCK, MSBFIRST);
 
-    digitalWrite(TANK_TEMPERATURE_SPI_CS, HIGH);
+    digitalWrite(TANK_DEPRESSS_VENT_TEMPERATURE_SPI_CS, HIGH);
     if (v & 0x4)
     {
         // Bit 2 indicates if the thermocouple is disconnected
@@ -70,9 +70,9 @@ public:
     return digitalRead(BATTERY_VOLTAGE_PIN);
   }
 
-  bool get_tank_depres_vent_valve_open()
+  bool get_tank_depress_vent_valve_open()
   {
-    return simulated_valve_status.tank_depres_vent_valve_open;
+    return simulated_valve_status.tank_depress_vent_valve_open;
   }
 
   bool get_engine_valve_open()

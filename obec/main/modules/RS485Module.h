@@ -27,9 +27,7 @@ class RS485Module {
       // digitalWrite(RS485_SET_TX_PIN, LOW); // We set ourselves as the receiver 
       Logger::log("Checking for commands...");
       if (Serial2.available()) {
-        digitalWrite(LED_PIN, HIGH);
-          delay(800);
-          digitalWrite(LED_PIN, LOW);
+        Logger::blink_debug_led_times(1);
         // Logger::log("Received command.");
         int message_len = Serial2.readBytesUntil('|', serial_buffer, 30);
         String message = String(serial_buffer).substring(0, message_len);
