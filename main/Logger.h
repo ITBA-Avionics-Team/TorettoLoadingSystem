@@ -3,12 +3,12 @@
 // #include "OLEDModule.h"
 // #endif // OLED_H
 #include <stdint.h>
-#define LED_PIN 25
+#define LED_PIN 2
 
 class Logger {
   static const bool errorActivated = false;
   static const bool debugActivated = false;
-  static const bool logActivated = true;
+  static const bool logActivated = false;
 
   public:
     static void error(float value) {
@@ -63,9 +63,9 @@ class Logger {
       pinMode(LED_PIN, OUTPUT);
       for (int i = 0; i < numOfTimes; i++){
         digitalWrite(LED_PIN, HIGH);
-        delay(300);
+        delay(50);
         digitalWrite(LED_PIN, LOW);
-        delay(300);
+        delay(50);
       }
     }
 

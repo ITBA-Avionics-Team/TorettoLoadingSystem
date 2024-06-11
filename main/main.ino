@@ -78,8 +78,9 @@ WeatherModule weather_module = WeatherModule();
 void setup()
 {
   Serial.begin(115200, SERIAL_8N1, 3, 1);
+  Serial2.begin(115200, SERIAL_8N1, 16, 17);
 
-  Logger::blink_debug_led_times(2);
+  Logger::blink_debug_led_times(5);
   
   storage_module.init();
   control_module.init();
@@ -165,7 +166,7 @@ void loop() {
       break;
     case LOADING:
       if (currMilis - last_milis > 100) {
-        if (system_status.tank_depress_vent_temperature_celsius < TANK_DEPRESS_VENT_LOW_TEMP) {
+        if (system_status.tank_depress_vent_temperature_celsius < TANK_DEPRESS_VENT_LOW_TEMP && system_status.tank_depress_vent_temperature_celsius != -17) {
           control_module.execute_valve_command(Command(ValveCommand, Close, LOADING_VALVE));
           communication_module.send_valve_command_to_OBEC(Command(ValveCommand, Close, TANK_DEPRESS_VENT_VALVE));
           switch_to_state(STANDBY);

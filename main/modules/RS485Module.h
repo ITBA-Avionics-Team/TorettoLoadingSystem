@@ -25,10 +25,10 @@ class RS485Module {
 
     OBECStatus check_for_status_message() {
       if (Serial.available()) {
-        Logger::blink_debug_led_times(1);
+        Logger::blink_debug_led_times(2);
         int message_len = Serial.readBytesUntil('|', serial_buffer, 30);
         String message = String(serial_buffer).substring(0, message_len);
-        Logger::log(String("Received status from OBEC:" + message));
+        // Logger::log(String("Received status from OBEC:" + message));
         // Logger::log(String("Length " + String(message_len)));
         if (message_len == 18) { // We only want to parse the message if it was a complete system status message
           if (command_queue.length() != 0)

@@ -25,7 +25,8 @@ class XBeeModule {
   public:
 
     XBeeModule() {
-      Serial2.begin(115200, SERIAL_8N1, RS485_RX_PIN, RS485_TX_PIN);
+      pinMode(5, OUTPUT);
+      digitalWrite(5, HIGH); 
     }
 
     Command check_for_commands(){
@@ -43,7 +44,7 @@ class XBeeModule {
       
       String system_status_msg = SystemStatus::to_message(system_status) + String("|");
       Serial2.println(system_status_msg);
-      // Logger::log(String("Sending system status message to MCC ") + system_status_msg);
+      Logger::log(String("Sending system status message to MCC ") + system_status_msg);
     }
 
     void send_preflight_check(PreflightCheckData data) {

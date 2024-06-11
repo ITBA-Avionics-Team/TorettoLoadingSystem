@@ -122,6 +122,7 @@ class CommunicationModule {
 
     void check_for_OBEC_status(){
       OBECStatus status = obec_communication.check_for_status_message();
+      if (status.tank_depress_vent_temperature_celsius > 15) Logger::blink_debug_led_times(4);
       if (!OBECStatus::is_empty(status)) {
         latest_OBEC_status = status;
         new_OBEC_status_available = true;
