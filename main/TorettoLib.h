@@ -318,46 +318,35 @@ public:
 // ValveControl.h
 enum Valve
 {
-  TANK_DEPRESS_VENT_VALVE,
   ENGINE_VALVE,
   LOADING_VALVE,
-  LOADING_LINE_DEPRESS_VENT_VALVE
 };
 
 bool is_LC_valve(Valve valve)
 {
-  return (valve == LOADING_VALVE || valve == LOADING_LINE_DEPRESS_VENT_VALVE);
+  return (valve == LOADING_VALVE);
 }
 
 String get_4_byte_string_from_valve(Valve valve)
 {
   switch (valve)
   {
-  case TANK_DEPRESS_VENT_VALVE:
-    return "TDVV";
   case ENGINE_VALVE:
     return "ENGV";
   case LOADING_VALVE:
     return "LDGV";
-  case LOADING_LINE_DEPRESS_VENT_VALVE:
-    return "LDVV";
   }
 }
 
 Valve get_valve_from_4_byte_string(String valve_str)
 {
-  if (valve_str.equals("TDVV")) {
-    return TANK_DEPRESS_VENT_VALVE;
-  } 
-  else if (valve_str.equals("ENGV")) {
+  if (valve_str.equals("ENGV")) {
     return ENGINE_VALVE;
   } 
   else if (valve_str.equals("LDGV")) {
     return LOADING_VALVE;
   } 
-  else if (valve_str.equals("LDVV")) {
-    return LOADING_LINE_DEPRESS_VENT_VALVE;
-  } 
+ 
 }
 
 // enum ValveAction {
@@ -410,19 +399,12 @@ public:
     case ValveCommand:
       switch (command.valve)
       {
-      case TANK_DEPRESS_VENT_VALVE:
-        return String("VCTDVV") + (command.uint_value == Open ? "1" : "0") + String("|");
-        break;
       case ENGINE_VALVE:
         return String("VCENGV") + (command.uint_value == Open ? "1" : "0") + String("|");
         break;
       case LOADING_VALVE:
         return String("VCLDGV") + (command.uint_value == Open ? "1" : "0") + String("|");
         break;
-      case LOADING_LINE_DEPRESS_VENT_VALVE:
-        return String("VCLDVV") + (command.uint_value == Open ? "1" : "0") + String("|");
-        break;
-      }
       break;
     case SwitchStateCommand:
       return String("SS") + get_4_byte_string_from_state(command.state) + String("|");
@@ -460,31 +442,6 @@ public:
   }
 };
 
-// class ValveCommand: Command {
-//   public:
-//     ValveAction action;
-//     Valve valve;
-
-//     ValveCommand(ValveAction actionVal, Valve valveVal) {
-//       action = actionVal;
-//       valve = valveVal;
-//     }
-// };
-
-// class SwitchStateCommand: Command {
-//   State state;
-//   SwitchStateCommand(State val) {
-//     state = val;
-//   }
-// }
-
-// class SetExternalVentAsDefaultCommand: Command {
-//   bool ext_vent_as_default;
-//   SetExternalVentAsDefaultCommand(bool val) {
-//     ext_vent_as_default = val;
-//   }
-// }
-
 // PreflightCheck.h
 class FlightComputersStatus
 {
@@ -514,7 +471,6 @@ public:
 
 class PreflightCheckData
 {
-
 public:
   float tank_pressure_bar;
   float tank_temperature_celsius;
