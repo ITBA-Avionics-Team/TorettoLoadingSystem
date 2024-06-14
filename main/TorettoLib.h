@@ -181,12 +181,9 @@ class SystemStatus
 
 public:
   State current_state;
-  int tank_pressure_bar; // Deprec
-  float tank_temperature_celsius; // Deprec
-  float tank_depress_vent_temperature_celsius; 
-  int loading_line_pressure_bar; 
+  float tank_depress_vent_temperature_celsius;
+  int loading_line_pressure_bar;
   float obec_battery_voltage_volt;
-  float lc_battery_voltage_volt;
   bool obec_connection_ok;
   bool tank_depress_vent_valve_open;
   bool engine_valve_open;
@@ -261,24 +258,21 @@ class OBECStatus
 public:
   float tank_depress_vent_temperature_celsius = -1;
   float obec_battery_voltage_volt = -1;
-  bool tank_depress_vent_valve_open = false;
   bool engine_valve_open = false;
 
   OBECStatus() {}
 
   OBECStatus(float tank_depress_vent_temperature_celsius_val,
              float obec_battery_voltage_volt_val,
-             bool tank_depress_vent_valve_open_val,
              bool engine_valve_open_val)
   {
     tank_depress_vent_temperature_celsius = tank_depress_vent_temperature_celsius_val;
     obec_battery_voltage_volt = obec_battery_voltage_volt_val;
-    tank_depress_vent_valve_open = tank_depress_vent_valve_open_val;
     engine_valve_open = engine_valve_open_val;
   }
 
-  // Format is <tank_depress_vent_t><obec_voltage><tank_depress_vent_valve_open><engine_valve_open>
-  // Example result (minus the spaces): -17.0 00.00 0 0|
+  // Format is <tank_depress_vent_t><obec_voltage><engine_valve_open>
+  // Example result (minus the spaces): -17.0 00.00 0|
 
   static String to_message(OBECStatus status)
   {
@@ -286,12 +280,10 @@ public:
     Logger::debug("Creating OBECStatus message...");
     String tank_depress_vent_temperature_str = get_formatted_temp_string(status.tank_depress_vent_temperature_celsius);
     String obec_battery_voltage_str = get_formatted_voltage_string(status.obec_battery_voltage_volt);
-    String tank_depress_vent_valve_open_str = String(status.tank_depress_vent_valve_open ? "1" : "0");
     String engine_valve_open_str = String(status.engine_valve_open ? "1" : "0");
 
     return tank_depress_vent_temperature_str +
            obec_battery_voltage_str +
-           tank_depress_vent_valve_open_str +
            engine_valve_open_str;
   }
 
@@ -301,8 +293,7 @@ public:
     OBECStatus result = OBECStatus(
         message.substring(0, 5).toFloat(),
         message.substring(5, 10).toFloat(),
-        message.charAt(10) == '1',
-        message.charAt(11) == '1'
+        message.charAt(10) == '1'
       );
     return result;
   }
@@ -310,7 +301,6 @@ public:
   { // TODO: We should create some king of static OBECStatus::EMPTY constant
     return status.tank_depress_vent_temperature_celsius == -1 &&
            status.obec_battery_voltage_volt == -1 &&
-           status.tank_depress_vent_valve_open == false &&
            status.engine_valve_open == false;
   }
 };

@@ -60,11 +60,6 @@ public:
     return digitalRead(BATTERY_VOLTAGE_PIN);
   }
 
-  bool get_tank_depress_vent_valve_open()
-  {
-    return simulated_valve_status.tank_depress_vent_valve_open;
-  }
-
   bool get_engine_valve_open()
   {
     return simulated_valve_status.engine_valve_open;
