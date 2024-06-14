@@ -94,8 +94,8 @@ void loop()
 }
 
 void update_sensor_data() {
-  system_status.tank_pressure_bar = sensor_module.get_tank_pressure_bar();
-  system_status.tank_temperature_celsius = sensor_module.get_tank_temperature_celsius();
   system_status.tank_depress_vent_temperature_celsius = sensor_module.get_tank_depres_vent_temperature_celsius();
   system_status.obec_battery_voltage_volt = sensor_module.get_obec_battery_voltage_volt();
+  system_status.tank_depress_vent_valve_open = sensor_module.get_tank_depress_vent_valve_open();
+  system_status.engine_valve_open = sensor_module.get_engine_valve_open();
 }

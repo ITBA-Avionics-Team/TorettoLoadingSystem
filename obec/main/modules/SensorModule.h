@@ -25,16 +25,6 @@ public:
     Logger::log("Sensor Module initialized.");
   }
 
-  int get_tank_pressure_bar()
-  {
-    return 0;
-  }
-
-  int get_tank_temperature_celsius()
-  {
-    return 0;
-  }
-
   float get_tank_depres_vent_temperature_celsius()
   {
     uint16_t v;
