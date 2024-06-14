@@ -121,20 +121,25 @@ String get_state_complete_string(State state)
     return "ABORT";
   }
 }
+
+// Examples: 100.0 095.1 005.4 -09.0 -99.5
 String get_formatted_temp_string(float temp) {
-  if (temp >= 100) return String("99.0");
-  if (temp >= 10) return String(temp, 1);
-  if (temp >= 0) return String("0") + String(temp, 1);
-  if (temp > -10) return String(temp, 1);
-  if (temp < -99) return "-99";
-  return String((int)temp);
+  if (temp >= 999) return String("999.0");
+  if (temp >= 100) return String(temp, 1);
+  if (temp >= 10) return String("0") + String(temp, 1);
+  if (temp >= 0) return String("00") + String(temp, 1);
+  if (temp >= -9) return String("-0") + String(-temp, 1);
+  if (temp >= -99) return String(temp, 1);
+  return "-99.0";
 }
 
+// Examples: 99.17 09.60 -8.45 -23.4
 String get_formatted_voltage_string(float voltage) {
-  if (voltage >= 10) return "9.99";
-  if (voltage >= 0) return String(voltage, 2);
-  if (voltage > -10) return String(voltage, 1);
-  return String((int)voltage);
+  if (voltage >= 10) return String(voltage, 2);
+  if (voltage >= 0) return String("0") + String(voltage, 2);
+  if (voltage >= -9) return String(voltage, 2);
+  if (voltage >= -99) return String(voltage, 1);
+  return String("-99.9");
 }
 
 
@@ -176,10 +181,10 @@ class SystemStatus
 
 public:
   State current_state;
-  int tank_pressure_bar;
-  float tank_temperature_celsius;
-  float tank_depress_vent_temperature_celsius;
-  int loading_line_pressure_bar;
+  int tank_pressure_bar; // Deprec
+  float tank_temperature_celsius; // Deprec
+  float tank_depress_vent_temperature_celsius; 
+  int loading_line_pressure_bar; 
   float obec_battery_voltage_volt;
   float lc_battery_voltage_volt;
   bool obec_connection_ok;
@@ -253,23 +258,7 @@ public:
 class OBECStatus
 {
 
- // Deprecated
-  static char create_status_flags_byte(bool tank_depress_vent_valve_open,
-                                       bool engine_valve_open)
-  {
-    Logger::error("OBECStatus.create_status_flags_byte() IS DEPRECATED AND SHOULD NOT BE USED!");
-    char result = 0;
-    if (tank_depress_vent_valve_open)
-      result++;
-    result << 1;
-    if (engine_valve_open)
-      result++;
-    return result + (1 << 3);// WARNING: LAST BIT SHOULD NOT BE USED!!
-  }
-
 public:
-  int tank_pressure_bar = -1;
-  float tank_temperature_celsius = -1;
   float tank_depress_vent_temperature_celsius = -1;
   float obec_battery_voltage_volt = -1;
   bool tank_depress_vent_valve_open = false;
@@ -277,70 +266,52 @@ public:
 
   OBECStatus() {}
 
-  OBECStatus(int tank_pressure_bar_val,
-             float tank_temperature_celsius_val,
-             float tank_depress_vent_temperature_celsius_val,
+  OBECStatus(float tank_depress_vent_temperature_celsius_val,
              float obec_battery_voltage_volt_val,
              bool tank_depress_vent_valve_open_val,
              bool engine_valve_open_val)
   {
-    tank_pressure_bar = tank_pressure_bar_val;
-    tank_temperature_celsius = tank_temperature_celsius_val;
     tank_depress_vent_temperature_celsius = tank_depress_vent_temperature_celsius_val;
     obec_battery_voltage_volt = obec_battery_voltage_volt_val;
     tank_depress_vent_valve_open = tank_depress_vent_valve_open_val;
     engine_valve_open = engine_valve_open_val;
   }
 
-  // Format is <tank_p><tank_t><tank_depress_vent_t><obec_voltage><sensor_data_byte>
-  // Example result (minus the spaces): 0110 20.0 24.0 4.17 0 0
-  //                                    0000 0.00 0.0 0.00 00|
+  // Format is <tank_depress_vent_t><obec_voltage><tank_depress_vent_valve_open><engine_valve_open>
+  // Example result (minus the spaces): -17.0 00.00 0 0|
 
   static String to_message(OBECStatus status)
   {
     char buffer[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
     Logger::debug("Creating OBECStatus message...");
-    sprintf(buffer, "%04d", status.tank_pressure_bar); // 4 is the desired number of digits (using leading zeroes)
-    String tank_pressure_str(buffer);
-    String tank_temperature_str = get_formatted_temp_string(status.tank_temperature_celsius);
     String tank_depress_vent_temperature_str = get_formatted_temp_string(status.tank_depress_vent_temperature_celsius);
     String obec_battery_voltage_str = get_formatted_voltage_string(status.obec_battery_voltage_volt);
-    String status_flags_str = get_status_flags_string(status.tank_depress_vent_valve_open,
-                                                      status.engine_valve_open);
+    String tank_depress_vent_valve_open_str = String(status.tank_depress_vent_valve_open ? "1" : "0");
+    String engine_valve_open_str = String(status.engine_valve_open ? "1" : "0");
 
-    return tank_pressure_str +
-           tank_temperature_str +
-           tank_depress_vent_temperature_str +
+    return tank_depress_vent_temperature_str +
            obec_battery_voltage_str +
-           status_flags_str;
+           tank_depress_vent_valve_open_str +
+           engine_valve_open_str;
   }
 
   static OBECStatus from_message(String message)
   {
     // TODO: if invalid, should return empty status
     OBECStatus result = OBECStatus(
-        message.substring(0, 4).toInt(),
-        message.substring(4, 8).toFloat(),
-        message.substring(8, 12).toFloat(),
-        message.substring(12, 16).toFloat(),
-        message.charAt(17) == '1',
-        message.charAt(18) == '1');
+        message.substring(0, 5).toFloat(),
+        message.substring(5, 10).toFloat(),
+        message.charAt(10) == '1',
+        message.charAt(11) == '1'
+      );
     return result;
   }
   static bool is_empty(OBECStatus status)
   { // TODO: We should create some king of static OBECStatus::EMPTY constant
-    return status.tank_pressure_bar == -1 &&
-           status.tank_temperature_celsius == -1 &&
-           status.tank_depress_vent_temperature_celsius == -1 &&
+    return status.tank_depress_vent_temperature_celsius == -1 &&
            status.obec_battery_voltage_volt == -1 &&
            status.tank_depress_vent_valve_open == false &&
            status.engine_valve_open == false;
-  }
-
-    static String get_status_flags_string(bool tank_depress_vent_valve_open,
-                                          bool engine_valve_open) {
-    return String(tank_depress_vent_valve_open ? "1" : "0") + 
-           String(engine_valve_open ? "1" : "0");
   }
 };
 
