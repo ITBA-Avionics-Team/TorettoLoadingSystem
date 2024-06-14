@@ -347,5 +347,5 @@ void update_sensor_and_weather_data() {
   system_status.hydraulic_umbrilical_connected = sensor_module.get_hydraulic_umbrilical_connected();
   system_status.igniter_continuity_ok = sensor_module.get_igniter_continuity_ok();
   system_status.wind_kt = weather_module.get_wind_kt();
-  system_status.tank_temperature_celsius = sensor_module.get_tank_temperature_celsius();
+  system_status.ground_temperature_celsius = sensor_module.get_ground_temperature_celsius();
 }

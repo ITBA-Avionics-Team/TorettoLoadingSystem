@@ -43,7 +43,7 @@ class SensorModule {
     return 0;
   }
 
-  int get_tank_temperature_celsius() {
+  int get_ground_temperature_celsius() {
     uint16_t v;
     digitalWrite(GROUND_TEMPERATURE_SPI_CS, LOW);
     delay(1);
