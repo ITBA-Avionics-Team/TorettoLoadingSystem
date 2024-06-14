@@ -7,7 +7,7 @@
 #include <ESP32Servo.h>
 
 #define LOADING_VALVE_PIN 14 // Relé (high low)
-#define LOADING_LINE_DEPRESS_VENT_VALVE_PIN 33 // Servo
+#define LOADING_LINE_DEPRESS_VENT_VALVE_PIN 19 // Relé (high low)
 #define NOX_UMBRILICAL_PIN 27 // Relé (high low)
 #define IGNITERS_PIN 13 // Relé (high low)
 
@@ -27,14 +27,26 @@ class ControlModule {
       delay(500);
 
       pinMode(LOADING_VALVE_PIN, OUTPUT);
+      pinMode(LOADING_LINE_DEPRESS_VENT_VALVE_PIN, OUTPUT);
       pinMode(NOX_UMBRILICAL_PIN, OUTPUT);
       pinMode(IGNITERS_PIN, OUTPUT);
-      delay(500);
+      delay(1000);
       
-      move_loading_valve_relay(Open);
+      move_relay(LOADING_VALVE_PIN, Open);
       delay(500);
-      move_loading_valve_relay(Close);
-
+      move_relay(LOADING_VALVE_PIN, Close);
+      delay(1000);
+      move_relay(LOADING_LINE_DEPRESS_VENT_VALVE_PIN, Open);
+      delay(500);
+      move_relay(LOADING_LINE_DEPRESS_VENT_VALVE_PIN, Close);
+      delay(1000);
+      move_relay(NOX_UMBRILICAL_PIN, Open);
+      delay(500);
+      move_relay(NOX_UMBRILICAL_PIN, Close);
+      delay(1000);
+      move_relay(IGNITERS_PIN, Open);
+      delay(500);
+      move_relay(IGNITERS_PIN, Close);
 
     }
 
@@ -45,10 +57,12 @@ class ControlModule {
       // move_loading_valve_servo(command.uint_value);
       switch (command.valve) {
         case LOADING_VALVE:
-          move_loading_valve_relay(command.uint_value);
+          move_relay(LOADING_VALVE_PIN, command.uint_value);
+          simulated_valve_status.loading_valve_open = command.uint_value > 127.5;
           break;
         case LOADING_LINE_DEPRESS_VENT_VALVE:
-          move_loading_line_depress_vent_valve_servo(command.uint_value);
+          move_relay(LOADING_LINE_DEPRESS_VENT_VALVE_PIN, command.uint_value);
+          simulated_valve_status.loading_depress_vent_valve_open = command.uint_value > 127.5;
           break;
       }
     }
@@ -64,17 +78,11 @@ class ControlModule {
     
     void disconnect_umbrilical() {
       Logger::debug("Control.disconnect_umbrilical");
-      move_umbrilical_relay(0); // 0 is disconnected, 255 is connected
+      move_relay(NOX_UMBRILICAL_PIN, 0); // 0 is disconnected, 255 is connected
     }
 
-    void move_loading_valve_relay(uint8_t value) {
-      digitalWrite(LOADING_VALVE_PIN, value > 127.5 ? HIGH : LOW);
-      simulated_valve_status.loading_valve_open = value > 127.5;
-    }
-
-    void move_loading_line_depress_vent_valve_servo(uint8_t value) {
-      loadingValveServo.write(180 * (value / 255));
-      simulated_valve_status.loading_depress_vent_valve_open = value > 127.5;
+    void move_relay(uint8_t pin, uint8_t value) {
+      digitalWrite(pin, value > 127.5 ? HIGH : LOW);
     }
 
     void move_umbrilical_relay(uint8_t value) {

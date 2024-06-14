@@ -8,10 +8,10 @@
 #include <SPI.h>
 
 #define LOADING_LINE_PRESSURE_PIN 25 // Analógico, medimos voltaje y hay relación lineal con la presión
-#define TANK_GROUND_PRESURE_PIN 26 // Analógico, medimos voltaje y hay relación lineal con la presión
-#define TANK_TEMPERATURE_SPI_SCK 4
-#define TANK_TEMPERATURE_SPI_CS 2
-#define TANK_TEMPERATURE_SPI_S0 15
+#define GROUND_PRESURE_PIN 26 // No está en uso, disponible. Analógico, medimos voltaje y hay relación lineal con la presión
+#define GROUND_TEMPERATURE_SPI_SCK 4
+#define GROUND_TEMPERATURE_SPI_CS 2
+#define GROUND_TEMPERATURE_SPI_S0 15
 #define UMBRILICAL_CONNECTED_PIN 34
 #define UMBRILICAL_FINISHED_DISCONNECT_PIN 35
 
@@ -29,9 +29,9 @@ class SensorModule {
 
   void init() {
     Logger::log("Initializing sensor Module...");
-    pinMode(TANK_TEMPERATURE_SPI_CS, OUTPUT);
-    pinMode(TANK_TEMPERATURE_SPI_S0, INPUT);
-    pinMode(TANK_TEMPERATURE_SPI_SCK, OUTPUT);
+    pinMode(GROUND_TEMPERATURE_SPI_CS, OUTPUT);
+    pinMode(GROUND_TEMPERATURE_SPI_S0, INPUT);
+    pinMode(GROUND_TEMPERATURE_SPI_SCK, OUTPUT);
     Logger::log("Sensor Module initialized.");
   }
 
@@ -45,7 +45,7 @@ class SensorModule {
 
   int get_tank_temperature_celsius() {
     uint16_t v;
-    digitalWrite(TANK_TEMPERATURE_SPI_CS, LOW);
+    digitalWrite(GROUND_TEMPERATURE_SPI_CS, LOW);
     delay(1);
 
     // Read in 16 bits,
@@ -54,11 +54,11 @@ class SensorModule {
     //  2     = 1 if thermocouple is open circuit
     //  1..0  = uninteresting status
 
-    v = shiftIn(TANK_TEMPERATURE_SPI_S0, TANK_TEMPERATURE_SPI_SCK, MSBFIRST);
+    v = shiftIn(GROUND_TEMPERATURE_SPI_S0, GROUND_TEMPERATURE_SPI_SCK, MSBFIRST);
     v <<= 8;
-    v |= shiftIn(TANK_TEMPERATURE_SPI_S0, TANK_TEMPERATURE_SPI_SCK, MSBFIRST);
+    v |= shiftIn(GROUND_TEMPERATURE_SPI_S0, GROUND_TEMPERATURE_SPI_SCK, MSBFIRST);
 
-    digitalWrite(TANK_TEMPERATURE_SPI_CS, HIGH);
+    digitalWrite(GROUND_TEMPERATURE_SPI_CS, HIGH);
     if (v & 0x4)
     {
         // Bit 2 indicates if the thermocouple is disconnected
