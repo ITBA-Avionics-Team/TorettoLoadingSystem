@@ -39,10 +39,6 @@ class SensorModule {
     return (analogRead(LOADING_LINE_PRESSURE_PIN) / 4095.0) * MAX_PRESSURE_VALUE_BAR;
   }
 
-  int get_ground_tank_presure_bar(){
-    return 0;
-  }
-
   int get_ground_temperature_celsius() {
     uint16_t v;
     digitalWrite(GROUND_TEMPERATURE_SPI_CS, LOW);
@@ -70,10 +66,6 @@ class SensorModule {
 
     // The remaining bits are the number of 0.25 degree (C) counts
     return v * 0.25;
-  }
-
-  float get_lc_battery_voltage_volt(){
-    return 0; // Deprecated
   }
 
   bool get_obec_connection_ok(){
