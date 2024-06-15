@@ -1,9 +1,3 @@
-#ifndef TORETTOLIB_H
-#define TORETTOLIB_H
-
-#include "TorettoLib.h"
-#endif // TORETTOLIB_H
-
 #include <ESP32Servo.h>
 
 #define LOADING_VALVE_PIN 14 // Relé (high low)
@@ -60,16 +54,7 @@ class ControlModule {
           move_relay(LOADING_VALVE_PIN, command.uint_value);
           simulated_valve_status.loading_valve_open = command.uint_value > 127.5;
           break;
-        case LOADING_LINE_DEPRESS_VENT_VALVE:
-          move_relay(LOADING_LINE_DEPRESS_VENT_VALVE_PIN, command.uint_value);
-          simulated_valve_status.loading_depress_vent_valve_open = command.uint_value > 127.5;
-          break;
       }
-    }
-
-    //Deprecated
-    void set_obec_power(bool on) {
-      Logger::debug("[DEPRECATED] Control.set_obec_power" + on);
     }
 
     void set_igniters_on(bool value) {
@@ -83,10 +68,6 @@ class ControlModule {
 
     void move_relay(uint8_t pin, uint8_t value) {
       digitalWrite(pin, value > 127.5 ? HIGH : LOW);
-    }
-
-    void move_umbrilical_relay(uint8_t value) {
-      digitalWrite(NOX_UMBRILICAL_PIN, value > 127.5 ? HIGH : LOW);
     }
 
 };

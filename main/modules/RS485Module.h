@@ -1,3 +1,5 @@
+#define RS485_RX_PIN 16
+#define RS485_TX_PIN 17
 #define RS485_SET_TX_PIN 22
 #define RS485_SET_RX_PIN 22
 
@@ -37,7 +39,7 @@ class RS485Module {
           return OBECStatus::from_message(message);
         }
       }
-      return OBECStatus(-1, -1, -1, -1, false, false);
+      return OBECStatus(-1, -1, false);
     }
 
     void send_valve_command_from_queue() {

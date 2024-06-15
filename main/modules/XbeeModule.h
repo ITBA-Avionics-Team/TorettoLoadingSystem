@@ -25,7 +25,8 @@ class XBeeModule {
       Logger::log(String("Sending system status message to MCC ") + system_status_msg);
     }
 
-    void send_preflight_check(PreflightCheckData data) {
+    void send_flight_computer_status(FlightComputersStatus data) {
+
     }
 
     void send_tank_depress_vent_temp_low() {

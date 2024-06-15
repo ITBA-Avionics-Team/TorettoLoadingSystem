@@ -3,6 +3,8 @@
 #include "Logger.h"
 #endif // LOGGER_H
 
+#include "TorettoLib.h"
+
 // #ifndef OLED_H
 // #define OLED_H
 // #include "OLEDModule.h"
@@ -12,7 +14,6 @@
 // #define SIMULATED_SENSOR_MODULE true
 // #define SIMULATED_COMMUNICATION_MODULE true
 
-#include "modules/StorageModule.h"
 #include "modules/ControlModule.h"
 #include "modules/WeatherModule.h"
 
@@ -20,7 +21,7 @@
 #include <string.h>
 
 
-const int MAX_LOADING_LINE_PRESSURE_PSI = 100;
+const int LOADING_LINE_PRESSURE_WARN_BAR = 200;
 const int TANK_PRESSURE_WARN_PSI = 100;
 const unsigned long MAX_PRESSURE_WARNING_TIME_MILLIS = 20000;
 const unsigned long MAX_PRESSURE_WARNING_TIME_EXT_VENT_MILLIS = 30000;
@@ -50,7 +51,6 @@ SimulationModule simulation_module = SimulationModule();
 
 SimulatedValveStatus simulated_valve_status = SimulatedValveStatus();
 
-StorageModule storage_module = StorageModule();
 ControlModule control_module = ControlModule(simulated_valve_status);
 
 
@@ -82,15 +82,12 @@ void setup()
 
   Logger::blink_debug_led_times(5);
   
-  storage_module.init();
   control_module.init();
   sensor_module.init();
-  // electromechanical_modul  e.init();
-  // communication_module.init();
+  communication_module.init();
 
   last_milis = millis();
 
-  // switch_to_state(storage_module.load_current_state(STANDBY));
   switch_to_state(STANDBY);
 }
 
@@ -151,12 +148,8 @@ void loop() {
   switch (system_status.current_state) {
     case STANDBY:
       if (currMilis - last_milis > 100) {
-        if (system_status.tank_pressure_bar > TANK_PRESSURE_WARN_PSI) {
-          if (system_status.external_vent_as_default) {
-            switch_to_state(STANDBY_PRESSURE_WARNING_EXTERNAL_VENT);
-          } else {
-            switch_to_state(STANDBY_PRESSURE_WARNING);
-          }
+        if (system_status.loading_line_pressure_bar > LOADING_LINE_PRESSURE_WARN_BAR) {
+          switch_to_state(STANDBY_PRESSURE_WARNING);
         }
         last_milis = currMilis;
       }
@@ -165,34 +158,18 @@ void loop() {
       if (currMilis - last_milis > 100) {
         if (system_status.tank_depress_vent_temperature_celsius < TANK_DEPRESS_VENT_LOW_TEMP && system_status.tank_depress_vent_temperature_celsius != -17) {
           control_module.execute_valve_command(Command(ValveCommand, Close, LOADING_VALVE));
-          communication_module.send_valve_command_to_OBEC(Command(ValveCommand, Close, TANK_DEPRESS_VENT_VALVE));
           switch_to_state(STANDBY);
         }
-
         last_milis = currMilis;
       }
       break;
     case STANDBY_PRESSURE_WARNING:
       if (currMilis - last_milis > 500) {
-        if (system_status.tank_pressure_bar > TANK_PRESSURE_WARN_PSI) {
+        if (system_status.loading_line_pressure_bar > LOADING_LINE_PRESSURE_WARN_BAR) {
           if (millis() - standby_pressure_warning_start_time > MAX_PRESSURE_WARNING_TIME_MILLIS) {
-            switch_to_state(STANDBY_PRESSURE_WARNING_EXTERNAL_VENT);
-          }
-        } else {
-          switch_to_state(STANDBY);
-        }
-        last_milis = currMilis;
-      }
-      break;
-    case STANDBY_PRESSURE_WARNING_EXTERNAL_VENT:
-      if (currMilis - last_milis > 500) {
-        if (system_status.tank_pressure_bar > TANK_PRESSURE_WARN_PSI) {
-          if (millis() - standby_pressure_warning_start_time > MAX_PRESSURE_WARNING_TIME_EXT_VENT_MILLIS) {
             switch_to_state(ABORT);
           }
         } else {
-          system_status.external_vent_as_default = true;
-          communication_module.send_external_vent_as_default_prompt_to_MCC();
           switch_to_state(STANDBY);
         }
         last_milis = currMilis;
@@ -211,30 +188,26 @@ void loop() {
       break;
     case PRE_LAUNCH_UMBRILICAL_DISCONNECT:
       if (currMilis - umbrilical_disconnect_time > 5000) {
-        if (sensor_module.get_hydraulic_umbrilical_connected()) {
+        if (sensor_module.get_hydraulic_umbrilical_connected() || !sensor_module.get_hydraulic_umbrilical_finished_disconnect()) {
           communication_module.send_umbrilical_abort_to_MCC();
           switch_to_state(STANDBY);
           break;
         }
         if (currMilis - umbrilical_disconnect_time > 10000) {
-          switch_to_state(IGNITION_BLEED_VALVE);
+          switch_to_state(IGNITION_OPEN_VALVE);
         }
       }
       break;
-    case IGNITION_BLEED_VALVE:
+    case IGNITION_OPEN_VALVE:
       if (currMilis - ignition_start_time > 1000) {
-          switch_to_state(IGNITION_IGNITERS_ON);
+        switch_to_state(IGNITION_IGNITERS_ON);
       }
       break;
     case IGNITION_IGNITERS_ON:
       if (currMilis - ignition_start_time > 4000) {
-        switch_to_state(IGNITION_OPEN_VALVE);
-      }
-    case IGNITION_OPEN_VALVE:
-      if (currMilis - ignition_start_time > 5000) {
         switch_to_state(IGNITION_IGNITERS_OFF);
       }
-      break;
+    
     case IGNITION_IGNITERS_OFF:
       if (currMilis - ignition_start_time > 4000) {
         control_module.set_igniters_on(false);
@@ -247,50 +220,22 @@ void loop() {
 void switch_to_state(State newState) {
   system_status.current_state = newState;
   Logger::log("Switching to state: " + get_state_complete_string(system_status.current_state));
-  storage_module.saveCurrentState(system_status.current_state);
   switch (system_status.current_state) {
-    case STANDBY:
-      control_module.execute_valve_command(Command(ValveCommand, Close, LOADING_LINE_DEPRESS_VENT_VALVE));
-      communication_module.send_valve_command_to_OBEC(Command(ValveCommand, Close, TANK_DEPRESS_VENT_VALVE));
     case STANDBY_PRESSURE_WARNING:
-      communication_module.send_valve_command_to_OBEC(Command(ValveCommand, Open, TANK_DEPRESS_VENT_VALVE));
       standby_pressure_warning_start_time = millis();
       break;
-    case STANDBY_PRESSURE_WARNING_EXTERNAL_VENT:
-      control_module.execute_valve_command(Command(ValveCommand, Open, LOADING_LINE_DEPRESS_VENT_VALVE));
-      break;
     case LOADING:
-      if (system_status.loading_line_pressure_bar < MAX_LOADING_LINE_PRESSURE_PSI && system_status.tank_pressure_bar < TANK_PRESSURE_WARN_PSI) {
+      if (system_status.loading_line_pressure_bar < LOADING_LINE_PRESSURE_WARN_BAR) {
         communication_module.send_valve_command_to_OBEC(Command(ValveCommand, Close, ENGINE_VALVE));
-        control_module.execute_valve_command(Command(ValveCommand, Close, LOADING_LINE_DEPRESS_VENT_VALVE));
-        communication_module.send_valve_command_to_OBEC(Command(ValveCommand, Open, TANK_DEPRESS_VENT_VALVE));
-        if (system_status.tank_depress_vent_temperature_celsius < TANK_DEPRESS_VENT_LOW_TEMP) { // TODO: This measurement probably isn't reliable if we check the temperature as soon as we send the signal to open the valve.
-          communication_module.send_tank_depress_vent_temp_low_to_MCC();
-          switch_to_state(STANDBY);
-        } else {
-          control_module.execute_valve_command(Command(ValveCommand, Open, LOADING_VALVE));
-        }
+        control_module.execute_valve_command(Command(ValveCommand, Open, LOADING_VALVE));
+      } else {
+        switch_to_state(STANDBY_PRESSURE_WARNING);
       }
       break;
     case PRE_FLIGHT_CHECK:
       {
-        PreflightCheckData preflight_check_data = PreflightCheckData();
-        preflight_check_data.tank_pressure_bar = system_status.tank_pressure_bar;
-        preflight_check_data.tank_temperature_celsius = system_status.tank_temperature_celsius;
-        preflight_check_data.engine_valve_open = system_status.engine_valve_open;
-        preflight_check_data.loading_valve_open = system_status.loading_valve_open;
-        control_module.set_obec_power(false);
-        delay(2000);
-        preflight_check_data.obec_battery_voltage_volt = system_status.obec_battery_voltage_volt;
-        if (preflight_check_data.obec_battery_voltage_volt > OBEC_LOWEST_BATTERY_VOLTAGE) {
-          preflight_check_data.lc_battery_voltage_volt = system_status.lc_battery_voltage_volt;
-          preflight_check_data.flight_computers_status = FlightComputersStatus(true, true, true);  // TODO: CHECK FLIGHT COMPUTERS STATUS
-          preflight_check_data.igniter_continuity_ok = system_status.igniter_continuity_ok;
-          preflight_check_data.weather_data = WeatherData(weather_module.get_wind_kt());
-        } else {
-          control_module.set_obec_power(true);
-        }
-        communication_module.send_preflight_check_data_to_MCC(preflight_check_data);
+        FlightComputersStatus status = FlightComputersStatus(true, true, true);
+        communication_module.send_flight_computer_status_to_MCC(status);
         preflight_check_time = millis();
         switch_to_state(STANDBY);
         break;
@@ -307,28 +252,21 @@ void switch_to_state(State newState) {
       control_module.disconnect_umbrilical();
       umbrilical_disconnect_time = millis();
       break;
-    case IGNITION_BLEED_VALVE:
+    case IGNITION_OPEN_VALVE:
       ignition_start_time = millis();
-      communication_module.send_valve_command_to_OBEC(Command(ValveCommand, 0.3 * 255, ENGINE_VALVE)); //  TODO: VERIFY CORRECT FUNCTIONALITY OF PARTIAL OPEN
+      communication_module.send_valve_command_to_OBEC(Command(ValveCommand, Open, ENGINE_VALVE));
       break;
     case IGNITION_IGNITERS_ON:
       control_module.set_igniters_on(true);
       break;
-    case IGNITION_OPEN_VALVE:
-      communication_module.send_valve_command_to_OBEC(Command(ValveCommand, Open, ENGINE_VALVE));
-      break;
     case IGNITION_IGNITERS_OFF:
       control_module.set_igniters_on(false);
-      communication_module.send_ignition_confirmation_to_OBEC();
       communication_module.send_ignition_confirmation_to_MCC();
       break;
     case ABORT:
-      communication_module.send_valve_command_to_OBEC(Command(ValveCommand, Open, TANK_DEPRESS_VENT_VALVE));
-      control_module.execute_valve_command(Command(ValveCommand, Open, LOADING_LINE_DEPRESS_VENT_VALVE));
       communication_module.send_valve_command_to_OBEC(Command(ValveCommand, Close, ENGINE_VALVE));
       control_module.execute_valve_command(Command(ValveCommand, Close, LOADING_VALVE));
       control_module.set_igniters_on(false);
-      communication_module.send_abort_signal_to_OBEC();
       break;
     default:
       break;

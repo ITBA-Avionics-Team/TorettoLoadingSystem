@@ -1,9 +1,5 @@
 #include <stdlib.h>
 #include <stdint.h>
-#ifndef TORETTOLIB_H
-#define TORETTOLIB_H
-#include "TorettoLib.h"
-#endif // TORETTOLIB_H
 
 #include "XbeeModule.h"
 #include "RS485Module.h"
@@ -33,8 +29,9 @@ class CommunicationModule {
 
   public:
 
-    CommunicationModule() {
-      // latest_MCC_command = Command(SetExternalVentAsDefaultCommand, false);
+    void init() {
+      Logger::log("Initializing Communication Module...");
+      Logger::log("Communication Module initialized.");
     }
 
     Command get_latest_MCC_command() {
@@ -65,22 +62,14 @@ class CommunicationModule {
       obec_communication.add_valve_command_to_send_queue(command);
     }
 
-    void send_abort_signal_to_OBEC() {
-      Logger::debug("Communication.send_abort_signal_to_OBEC");
-    }
-
-    void send_ignition_confirmation_to_OBEC() {
-      Logger::debug("Communication.send_ignition_confirmation_to_OBEC");
-    }
-
     void send_system_status_to_MCC(SystemStatus system_status) {
       Logger::debug("Communication.send_system_status_to_MCC");
       mcc_xbee.send_system_status(system_status);
     }
 
-    void send_preflight_check_data_to_MCC(PreflightCheckData data) {
+    void send_flight_computer_status_to_MCC(FlightComputersStatus data) {
       Logger::debug("Communication.send_preflight_check_data_to_MCC");
-      mcc_xbee.send_preflight_check(data);
+      mcc_xbee.send_flight_computer_status(data);
     }
 
     void send_stale_flight_check_to_MCC() {

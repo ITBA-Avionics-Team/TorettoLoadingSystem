@@ -6,14 +6,12 @@ enum State
 {
   STANDBY,
   STANDBY_PRESSURE_WARNING,
-  STANDBY_PRESSURE_WARNING_EXTERNAL_VENT,
   LOADING,
   PRE_FLIGHT_CHECK,
   PRE_LAUNCH_WIND_CHECK,
   PRE_LAUNCH_UMBRILICAL_DISCONNECT,
-  IGNITION_BLEED_VALVE,
-  IGNITION_IGNITERS_ON,
   IGNITION_OPEN_VALVE,
+  IGNITION_IGNITERS_ON,
   IGNITION_IGNITERS_OFF,
   ABORT
 };
@@ -26,8 +24,6 @@ String get_4_byte_string_from_state(State state)
     return "STBY";
   case STANDBY_PRESSURE_WARNING:
     return "STPW";
-  case STANDBY_PRESSURE_WARNING_EXTERNAL_VENT:
-    return "STPE";
   case LOADING:
     return "LDNG";
   case PRE_FLIGHT_CHECK:
@@ -36,12 +32,10 @@ String get_4_byte_string_from_state(State state)
     return "PRLW";
   case PRE_LAUNCH_UMBRILICAL_DISCONNECT:
     return "PRLU";
-  case IGNITION_BLEED_VALVE:
-    return "IGBL";
-  case IGNITION_IGNITERS_ON:
-    return "IGON";
   case IGNITION_OPEN_VALVE:
     return "IGVO";
+  case IGNITION_IGNITERS_ON:
+    return "IGON";
   case IGNITION_IGNITERS_OFF:
     return "IGOF";
   case ABORT:
@@ -58,9 +52,6 @@ State get_state_from_4_byte_string(String state_str)
   else if (state_str.equals("STPW")) {
     return STANDBY_PRESSURE_WARNING;
   } 
-  else if (state_str.equals("STPE")) {
-    return STANDBY_PRESSURE_WARNING_EXTERNAL_VENT;
-  } 
   else if (state_str.equals("LDNG")) {
     return LOADING;
   } 
@@ -72,15 +63,12 @@ State get_state_from_4_byte_string(String state_str)
   } 
   else if (state_str.equals("PRLU")) {
     return PRE_LAUNCH_UMBRILICAL_DISCONNECT;
-  } 
-  else if (state_str.equals("IGBL")) {
-    return IGNITION_BLEED_VALVE;
   }
-  else if (state_str.equals("IGON")) {
-    return IGNITION_IGNITERS_ON;
-  } 
   else if (state_str.equals("IGVO")) {
     return IGNITION_OPEN_VALVE;
+  } 
+  else if (state_str.equals("IGON")) {
+    return IGNITION_IGNITERS_ON;
   } 
   else if (state_str.equals("IGOF")) {
     return IGNITION_IGNITERS_OFF;
@@ -99,8 +87,6 @@ String get_state_complete_string(State state)
     return "STANDBY";
   case STANDBY_PRESSURE_WARNING:
     return "STANDBY_PRESSURE_WARNING";
-  case STANDBY_PRESSURE_WARNING_EXTERNAL_VENT:
-    return "STANDBY_PRESSURE_WARNING_EXTERNAL_VENT";
   case LOADING:
     return "LOADING";
   case PRE_FLIGHT_CHECK:
@@ -109,12 +95,10 @@ String get_state_complete_string(State state)
     return "PRE_LAUNCH_WIND_CHECK";
   case PRE_LAUNCH_UMBRILICAL_DISCONNECT:
     return "PRE_LAUNCH_UMBRILICAL_DISCONNECT";
-  case IGNITION_BLEED_VALVE:
-    return "IGNITION_BLEED_VALVE";
-  case IGNITION_IGNITERS_ON:
-    return "IGNITION_IGNITERS_ON";
   case IGNITION_OPEN_VALVE:
     return "IGNITION_OPEN_VALVE";
+  case IGNITION_IGNITERS_ON:
+    return "IGNITION_IGNITERS_ON";
   case IGNITION_IGNITERS_OFF:
     return "IGNITION_IGNITERS_OFF";
   case ABORT:
@@ -337,25 +321,26 @@ public:
   {
     switch (command.type)
     {
-    case ValveCommand:
-      switch (command.valve)
-      {
-      case ENGINE_VALVE:
-        return String("VCENGV") + (command.uint_value == Open ? "1" : "0") + String("|");
+      case ValveCommand:
+        switch (command.valve)
+        {
+          case ENGINE_VALVE:
+            return String("VCENGV") + (command.uint_value == Open ? "1" : "0") + String("|");
+            break;
+          case LOADING_VALVE:
+            return String("VCLDGV") + (command.uint_value == Open ? "1" : "0") + String("|");
+            break;
+        }
         break;
-      case LOADING_VALVE:
-        return String("VCLDGV") + (command.uint_value == Open ? "1" : "0") + String("|");
+      case SwitchStateCommand:
+        return String("SS") + get_4_byte_string_from_state(command.state) + String("|");
         break;
-      break;
-    case SwitchStateCommand:
-      return String("SS") + get_4_byte_string_from_state(command.state) + String("|");
-      break;
-    case SetExternalVentAsDefaultCommand:
-      return String("EV") + command.bool_value ? String("1") : String("0") + String("|");
-      break;
-    case EMPTY:
-      break;
-    }
+      case SetExternalVentAsDefaultCommand:
+        return String("EV") + command.bool_value ? String("1") : String("0") + String("|");
+        break;
+      case EMPTY:
+        break;
+      }
   }
 
   static Command from_message(String message)
@@ -413,12 +398,10 @@ public:
 class PreflightCheckData
 {
 public:
-  float tank_pressure_bar;
-  float tank_temperature_celsius;
+  float loading_line_pressure_bar;
   bool engine_valve_open;
   bool loading_valve_open;
   float obec_battery_voltage_volt;
-  float lc_battery_voltage_volt;
   FlightComputersStatus flight_computers_status;
   bool igniter_continuity_ok;
   WeatherData weather_data;
