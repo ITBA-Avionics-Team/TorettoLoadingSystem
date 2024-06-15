@@ -30,12 +30,14 @@ const int MAX_LAUNCH_WIND_KT = 12;
 const float TANK_DEPRESS_VENT_LOW_TEMP = 10;
 
 const float OBEC_LOWEST_BATTERY_VOLTAGE = 4;
+const unsigned long OBEC_CONNECTION_LOST_TIMEOUT_MILLIS = 3000;
 
 
 // System status variables
 SystemStatus system_status = SystemStatus();
 unsigned long last_milis = 0;
 unsigned long last_mcc_update_milis = 0;
+unsigned long last_obec_status_received_milis = 0;
 unsigned long simulation_mode_update_millis = 0;
 unsigned long preflight_check_time = 0;
 unsigned long standby_pressure_warning_start_time = 0;
@@ -129,6 +131,7 @@ void loop() {
     }
 
     if (communication_module.get_new_OBEC_status_available()) {
+      last_obec_status_received_milis = millis();
       // Logger::log("[Main]new OBEC status available");
       OBECStatus obec_status = communication_module.get_latest_OBEC_status();
       system_status.tank_depress_vent_temperature_celsius = obec_status.tank_depress_vent_temperature_celsius;
@@ -276,7 +279,7 @@ void switch_to_state(State newState) {
 void update_sensor_and_weather_data() {
   system_status.loading_line_pressure_bar = sensor_module.get_loading_line_pressure_bar();
   system_status.ground_temperature_celsius = sensor_module.get_ground_temperature_celsius();
-  system_status.obec_connection_ok = sensor_module.get_obec_connection_ok();
+  system_status.obec_connection_ok = millis() - last_obec_status_received_milis < OBEC_CONNECTION_LOST_TIMEOUT_MILLIS;
   system_status.loading_valve_open = sensor_module.get_loading_valve_open();
   system_status.loading_depress_vent_valve_open = sensor_module.get_loading_depress_vent_valve_open();
   system_status.hydraulic_umbrilical_connected = sensor_module.get_hydraulic_umbrilical_connected();
