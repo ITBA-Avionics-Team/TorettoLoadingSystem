@@ -58,7 +58,7 @@ class SensorModule {
     if (v & 0x4)
     {
         // Bit 2 indicates if the thermocouple is disconnected
-        return NAN;
+        return -17;
     }
 
     // The lower three bits (0,1,2) are discarded status bits

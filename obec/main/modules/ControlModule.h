@@ -28,7 +28,7 @@ public:
     {
     case ENGINE_VALVE:
       move_relay(ENGINE_VALVE_PIN, command.uint_value);
-      simulated_valve_status.engine_valve_open = value > 127.5;
+      simulated_valve_status.engine_valve_open = command.uint_value > 127.5;
       break;
     }
   }
