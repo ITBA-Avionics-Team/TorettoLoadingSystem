@@ -177,6 +177,7 @@ public:
           loading_line_pressure_str +
           ground_temperature_celsius_str +
           obec_battery_voltage_str +
+          obec_connection_ok_str +
           engine_valve_open_str +
           loading_valve_open_str +
           loading_depress_vent_valve_open_str +
