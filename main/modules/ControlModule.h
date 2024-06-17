@@ -1,9 +1,9 @@
 #include <ESP32Servo.h>
 
-#define LOADING_VALVE_PIN 14 // Relé (high low)
-#define LOADING_LINE_DEPRESS_VENT_VALVE_PIN 19 // Relé (high low)
 #define NOX_UMBRILICAL_PIN 27 // Relé (high low)
-#define IGNITERS_PIN 13 // Relé (high low)
+#define IGNITERS_PIN 14 // Relé (high low)
+#define LOADING_VALVE_PIN 13 // Relé (high low)
+#define ENGINE_VALVE_PIN 19 // Relé (high low)
 
 class ControlModule {
 
@@ -20,20 +20,11 @@ class ControlModule {
         
       delay(500);
 
-      pinMode(LOADING_VALVE_PIN, OUTPUT);
-      pinMode(LOADING_LINE_DEPRESS_VENT_VALVE_PIN, OUTPUT);
       pinMode(NOX_UMBRILICAL_PIN, OUTPUT);
+      pinMode(LOADING_VALVE_PIN, OUTPUT);
       pinMode(IGNITERS_PIN, OUTPUT);
-      delay(1000);
-      
-      move_relay(LOADING_VALVE_PIN, Open);
-      delay(500);
-      move_relay(LOADING_VALVE_PIN, Close);
-      delay(1000);
-      move_relay(LOADING_LINE_DEPRESS_VENT_VALVE_PIN, Open);
-      delay(500);
-      move_relay(LOADING_LINE_DEPRESS_VENT_VALVE_PIN, Close);
-      delay(1000);
+      pinMode(ENGINE_VALVE_PIN, OUTPUT);
+
       move_relay(NOX_UMBRILICAL_PIN, Open);
       delay(500);
       move_relay(NOX_UMBRILICAL_PIN, Close);
@@ -41,6 +32,14 @@ class ControlModule {
       move_relay(IGNITERS_PIN, Open);
       delay(500);
       move_relay(IGNITERS_PIN, Close);
+      delay(1000);
+      move_relay(LOADING_VALVE_PIN, Open);
+      delay(500);
+      move_relay(LOADING_VALVE_PIN, Close);
+      delay(1000);
+      move_relay(ENGINE_VALVE_PIN, Open);
+      delay(500);
+      move_relay(ENGINE_VALVE_PIN, Close);
 
     }
 
@@ -53,6 +52,10 @@ class ControlModule {
         case LOADING_VALVE:
           move_relay(LOADING_VALVE_PIN, command.uint_value);
           simulated_valve_status.loading_valve_open = command.uint_value > 127.5;
+          break;
+        case ENGINE_VALVE:
+          move_relay(ENGINE_VALVE_PIN, command.uint_value);
+          simulated_valve_status.engine_valve_open = command.uint_value > 127.5;
           break;
       }
     }

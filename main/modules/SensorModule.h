@@ -7,8 +7,8 @@
 #include <Wire.h>
 #include <SPI.h>
 
-#define LOADING_LINE_PRESSURE_PIN 25 // Analógico, medimos voltaje y hay relación lineal con la presión
-#define GROUND_PRESURE_PIN 26 // No está en uso, disponible. Analógico, medimos voltaje y hay relación lineal con la presión
+#define LOADING_LINE_PRESSURE_PIN 26 // Analógico, medimos voltaje y hay relación lineal con la presión
+#define GROUND_PRESSURE_PIN 33 // Analógico, medimos corriente
 #define GROUND_TEMPERATURE_SPI_SCK 4
 #define GROUND_TEMPERATURE_SPI_CS 2
 #define GROUND_TEMPERATURE_SPI_S0 15
@@ -18,7 +18,8 @@
 #define UMBRILICAL_VOLTAGE_TOLERANCE_EPSILON 0.3
 
 #define REFERENCE_VOLTAGE 3.3
-#define MAX_PRESSURE_VALUE_BAR 250
+#define MAX_PRESSURE_VALUE_BAR 250.0
+#define MAX_GROUND_PRESSURE_VALUE_BAR 60.0
 
 class SensorModule {
 
@@ -32,11 +33,17 @@ class SensorModule {
     pinMode(GROUND_TEMPERATURE_SPI_CS, OUTPUT);
     pinMode(GROUND_TEMPERATURE_SPI_S0, INPUT);
     pinMode(GROUND_TEMPERATURE_SPI_SCK, OUTPUT);
+    pinMode(UMBRILICAL_CONNECTED_PIN, INPUT_PULLUP);
+    pinMode(UMBRILICAL_FINISHED_DISCONNECT_PIN, INPUT_PULLUP);
     Logger::log("Sensor Module initialized.");
   }
 
-  int get_loading_line_pressure_bar(){
+  int get_loading_line_pressure_bar(){ // Presion en base a la tension
     return (analogRead(LOADING_LINE_PRESSURE_PIN) / 4095.0) * MAX_PRESSURE_VALUE_BAR;
+  }
+
+  int get_ground_pressure_bar(){ // Presion en base a la corriente
+    return ((analogRead(GROUND_PRESSURE_PIN) - 400.0) / 1600.0) * 60.0 + 1.0;
   }
 
   int get_ground_temperature_celsius() {
@@ -76,16 +83,14 @@ class SensorModule {
     return simulated_valve_status.loading_valve_open;
   }
 
-  bool get_loading_depress_vent_valve_open(){
-    return simulated_valve_status.loading_depress_vent_valve_open;
-  }
-
   bool get_hydraulic_umbrilical_connected() {
-    return digitalRead(UMBRILICAL_CONNECTED_PIN) > HIGH - UMBRILICAL_VOLTAGE_TOLERANCE_EPSILON;
+    // Serial.println(String(analogRead(UMBRILICAL_CONNECTED_PIN)));
+    return digitalRead(UMBRILICAL_CONNECTED_PIN) == 0;
   }
 
     bool get_hydraulic_umbrilical_finished_disconnect() {
-    return digitalRead(UMBRILICAL_FINISHED_DISCONNECT_PIN) > HIGH - UMBRILICAL_VOLTAGE_TOLERANCE_EPSILON;
+    // Serial.println(String(analogRead(UMBRILICAL_FINISHED_DISCONNECT_PIN)));
+    return digitalRead(UMBRILICAL_FINISHED_DISCONNECT_PIN) == 0;
   }
 
   bool get_igniter_continuity_ok(){

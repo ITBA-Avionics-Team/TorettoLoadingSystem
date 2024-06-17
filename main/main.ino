@@ -82,7 +82,7 @@ void setup()
   Serial.begin(115200, SERIAL_8N1, 3, 1);
   Serial2.begin(115200, SERIAL_8N1, 16, 17);
 
-  Logger::blink_debug_led_times(5);
+  // Logger::blink_debug_led_times(5);
   
   control_module.init();
   sensor_module.init();
@@ -113,18 +113,10 @@ void loop() {
       Command command = communication_module.get_latest_MCC_command();
       switch (command.type) {
         case ValveCommand:
-          if (is_LC_valve(command.valve)) {
-            // digitalWrite(LED_PIN, HIGH);
-            control_module.execute_valve_command(command);
-          } else {
-            communication_module.send_valve_command_to_OBEC(command);
-          }
+          control_module.execute_valve_command(command);
           break;
         case SwitchStateCommand:
           switch_to_state(command.state);
-          break;
-        case SetExternalVentAsDefaultCommand:
-          system_status.external_vent_as_default = command.bool_value;
           break;
       }
       communication_module.set_new_MCC_command_available(false);
@@ -132,11 +124,9 @@ void loop() {
 
     if (communication_module.get_new_OBEC_status_available()) {
       last_obec_status_received_milis = millis();
-      // Logger::log("[Main]new OBEC status available");
       OBECStatus obec_status = communication_module.get_latest_OBEC_status();
       system_status.tank_depress_vent_temperature_celsius = obec_status.tank_depress_vent_temperature_celsius;
       system_status.obec_battery_voltage_volt = obec_status.obec_battery_voltage_volt;
-      system_status.engine_valve_open = obec_status.engine_valve_open;
 
       communication_module.set_new_OBEC_status_available(false);
     }
@@ -229,7 +219,7 @@ void switch_to_state(State newState) {
       break;
     case LOADING:
       if (system_status.loading_line_pressure_bar < LOADING_LINE_PRESSURE_WARN_BAR) {
-        communication_module.send_valve_command_to_OBEC(Command(ValveCommand, Close, ENGINE_VALVE));
+        control_module.execute_valve_command(Command(ValveCommand, Close, ENGINE_VALVE));
         control_module.execute_valve_command(Command(ValveCommand, Open, LOADING_VALVE));
       } else {
         switch_to_state(STANDBY_PRESSURE_WARNING);
@@ -257,7 +247,7 @@ void switch_to_state(State newState) {
       break;
     case IGNITION_OPEN_VALVE:
       ignition_start_time = millis();
-      communication_module.send_valve_command_to_OBEC(Command(ValveCommand, Open, ENGINE_VALVE));
+      control_module.execute_valve_command(Command(ValveCommand, Open, ENGINE_VALVE));
       break;
     case IGNITION_IGNITERS_ON:
       control_module.set_igniters_on(true);
@@ -267,7 +257,7 @@ void switch_to_state(State newState) {
       communication_module.send_ignition_confirmation_to_MCC();
       break;
     case ABORT:
-      communication_module.send_valve_command_to_OBEC(Command(ValveCommand, Close, ENGINE_VALVE));
+      control_module.execute_valve_command(Command(ValveCommand, Close, ENGINE_VALVE));
       control_module.execute_valve_command(Command(ValveCommand, Close, LOADING_VALVE));
       control_module.set_igniters_on(false);
       break;
@@ -278,12 +268,11 @@ void switch_to_state(State newState) {
 
 void update_sensor_and_weather_data() {
   system_status.loading_line_pressure_bar = sensor_module.get_loading_line_pressure_bar();
+  system_status.ground_pressure_bar = sensor_module.get_ground_pressure_bar();
   system_status.ground_temperature_celsius = sensor_module.get_ground_temperature_celsius();
   system_status.obec_connection_ok = millis() - last_obec_status_received_milis < OBEC_CONNECTION_LOST_TIMEOUT_MILLIS;
   system_status.loading_valve_open = sensor_module.get_loading_valve_open();
-  system_status.loading_depress_vent_valve_open = sensor_module.get_loading_depress_vent_valve_open();
   system_status.hydraulic_umbrilical_connected = sensor_module.get_hydraulic_umbrilical_connected();
   system_status.hydraulic_umbrilical_finished_disconnect = sensor_module.get_hydraulic_umbrilical_finished_disconnect();
-  system_status.igniter_continuity_ok = sensor_module.get_igniter_continuity_ok();
   system_status.wind_kt = weather_module.get_wind_kt();
 }

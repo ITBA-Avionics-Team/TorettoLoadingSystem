@@ -58,10 +58,6 @@ class CommunicationModule {
       new_OBEC_status_available = val;
     }
 
-    void send_valve_command_to_OBEC(Command command) {
-      obec_communication.add_valve_command_to_send_queue(command);
-    }
-
     void send_system_status_to_MCC(SystemStatus system_status) {
       Logger::debug("Communication.send_system_status_to_MCC");
       mcc_xbee.send_system_status(system_status);
@@ -111,7 +107,7 @@ class CommunicationModule {
 
     void check_for_OBEC_status(){
       OBECStatus status = obec_communication.check_for_status_message();
-      if (status.tank_depress_vent_temperature_celsius > 15) Logger::blink_debug_led_times(4);
+      // if (status.tank_depress_vent_temperature_celsius > 15) Logger::blink_debug_led_times(4);
       if (!OBECStatus::is_empty(status)) {
         latest_OBEC_status = status;
         new_OBEC_status_available = true;
