@@ -182,7 +182,7 @@ void loop() {
       }
       break;
     case PRE_LAUNCH_UMBRILICAL_DISCONNECT:
-      if (currMilis - umbrilical_disconnect_time > 10000) {
+      if (currMilis - umbrilical_disconnect_time > 5000) {
         control_module.disconnect_umbrilical(false);
         switch_to_state(STANDBY);
       }
