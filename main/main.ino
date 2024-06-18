@@ -44,6 +44,7 @@ unsigned long standby_pressure_warning_start_time = 0;
 unsigned long pre_launch_start_time = 0;
 unsigned long umbrilical_disconnect_time = 0;
 unsigned long ignition_start_time = 0;
+unsigned long igniters_on_time = 0;
 
 // Modules
 #ifdef SIMULATION_MODULE
@@ -113,6 +114,7 @@ void loop() {
       Command command = communication_module.get_latest_MCC_command();
       switch (command.type) {
         case ValveCommand:
+        // Serial.println("Received command");
           control_module.execute_valve_command(command);
           break;
         case SwitchStateCommand:
@@ -180,15 +182,9 @@ void loop() {
       }
       break;
     case PRE_LAUNCH_UMBRILICAL_DISCONNECT:
-      if (currMilis - umbrilical_disconnect_time > 5000) {
-        if (sensor_module.get_hydraulic_umbrilical_connected() || !sensor_module.get_hydraulic_umbrilical_finished_disconnect()) {
-          communication_module.send_umbrilical_abort_to_MCC();
-          switch_to_state(STANDBY);
-          break;
-        }
-        if (currMilis - umbrilical_disconnect_time > 10000) {
-          switch_to_state(IGNITION_OPEN_VALVE);
-        }
+      if (currMilis - umbrilical_disconnect_time > 10000) {
+        control_module.disconnect_umbrilical(false);
+        switch_to_state(STANDBY);
       }
       break;
     case IGNITION_OPEN_VALVE:
@@ -197,10 +193,11 @@ void loop() {
       }
       break;
     case IGNITION_IGNITERS_ON:
-      if (currMilis - ignition_start_time > 4000) {
-        switch_to_state(IGNITION_IGNITERS_OFF);
+      if (currMilis - igniters_on_time > 10000) {
+        control_module.set_igniters_on(false);
+        switch_to_state(STANDBY);
       }
-    
+      break;
     case IGNITION_IGNITERS_OFF:
       if (currMilis - ignition_start_time > 4000) {
         control_module.set_igniters_on(false);
@@ -242,7 +239,7 @@ void switch_to_state(State newState) {
       }
       break;
     case PRE_LAUNCH_UMBRILICAL_DISCONNECT:
-      control_module.disconnect_umbrilical();
+      control_module.disconnect_umbrilical(true);
       umbrilical_disconnect_time = millis();
       break;
     case IGNITION_OPEN_VALVE:
@@ -250,6 +247,7 @@ void switch_to_state(State newState) {
       control_module.execute_valve_command(Command(ValveCommand, Open, ENGINE_VALVE));
       break;
     case IGNITION_IGNITERS_ON:
+      igniters_on_time = millis();
       control_module.set_igniters_on(true);
       break;
     case IGNITION_IGNITERS_OFF:

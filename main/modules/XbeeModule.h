@@ -14,6 +14,7 @@ class XBeeModule {
       if (Serial2.available()) {
         int message_len = Serial2.readBytesUntil('|', serial_buffer, 30);
         String message = String(serial_buffer).substring(0, message_len);
+        // Serial.println(message);
         return Command::from_message(message);
       }
       return Command(EMPTY);
@@ -22,7 +23,7 @@ class XBeeModule {
     void send_system_status(SystemStatus system_status){
       String system_status_msg = SystemStatus::to_message(system_status) + String("|");
       Serial2.println(system_status_msg);
-      Serial.println(system_status_msg);
+      // Serial.println(system_status_msg);
       Logger::log(String("Sending system status message to MCC ") + system_status_msg);
     }
 

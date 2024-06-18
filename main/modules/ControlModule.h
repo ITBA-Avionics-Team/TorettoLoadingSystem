@@ -24,22 +24,26 @@ class ControlModule {
       pinMode(LOADING_VALVE_PIN, OUTPUT);
       pinMode(IGNITERS_PIN, OUTPUT);
       pinMode(ENGINE_VALVE_PIN, OUTPUT);
+      digitalWrite(NOX_UMBRILICAL_PIN, HIGH);
+      digitalWrite(LOADING_VALVE_PIN, HIGH);
+      digitalWrite(IGNITERS_PIN, HIGH);
+      digitalWrite(ENGINE_VALVE_PIN, HIGH);
 
-      move_relay(NOX_UMBRILICAL_PIN, Open);
-      delay(500);
-      move_relay(NOX_UMBRILICAL_PIN, Close);
-      delay(1000);
-      move_relay(IGNITERS_PIN, Open);
-      delay(500);
-      move_relay(IGNITERS_PIN, Close);
-      delay(1000);
-      move_relay(LOADING_VALVE_PIN, Open);
-      delay(500);
-      move_relay(LOADING_VALVE_PIN, Close);
-      delay(1000);
-      move_relay(ENGINE_VALVE_PIN, Open);
-      delay(500);
-      move_relay(ENGINE_VALVE_PIN, Close);
+      // move_relay(NOX_UMBRILICAL_PIN, Open);
+      // delay(500);
+      // move_relay(NOX_UMBRILICAL_PIN, Close);
+      // delay(500);
+      // move_relay(IGNITERS_PIN, Open);
+      // delay(500);
+      // move_relay(IGNITERS_PIN, Close);
+      // delay(500);
+      // move_relay(LOADING_VALVE_PIN, Open);
+      // delay(500);
+      // move_relay(LOADING_VALVE_PIN, Close);
+      // delay(500);
+      // move_relay(ENGINE_VALVE_PIN, Open);
+      // delay(500);
+      // move_relay(ENGINE_VALVE_PIN, Close);
 
     }
 
@@ -62,15 +66,16 @@ class ControlModule {
 
     void set_igniters_on(bool value) {
       Logger::debug("Control.set_igniters_on" + value);
+      move_relay(IGNITERS_PIN, value ? 255 : 0);
     }
     
-    void disconnect_umbrilical() {
+    void disconnect_umbrilical(bool value) {
       Logger::debug("Control.disconnect_umbrilical");
-      move_relay(NOX_UMBRILICAL_PIN, 0); // 0 is disconnected, 255 is connected
+      move_relay(NOX_UMBRILICAL_PIN, value ? 255 : 0);
     }
 
     void move_relay(uint8_t pin, uint8_t value) {
-      digitalWrite(pin, value > 127.5 ? HIGH : LOW);
+      digitalWrite(pin, value > 127.5 ? LOW : HIGH);
     }
 
 };

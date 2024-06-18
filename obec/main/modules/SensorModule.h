@@ -8,13 +8,11 @@
 #define TANK_DEPRESSS_VENT_TEMPERATURE_SPI_CS 2
 #define TANK_DEPRESSS_VENT_TEMPERATURE_SPI_S0 4
 
-#define BATTERY_VOLTAGE_PIN 35
+#define BATTERY_VOLTAGE_PIN 32
 
 class SensorModule
 {
-  SimulatedValveStatus& simulated_valve_status;
 public:
-  SensorModule(SimulatedValveStatus& simulated_valve_status_val) : simulated_valve_status(simulated_valve_status_val) {}
   
   void init()
   {
@@ -22,6 +20,7 @@ public:
     pinMode(TANK_DEPRESSS_VENT_TEMPERATURE_SPI_CS, OUTPUT);
     pinMode(TANK_DEPRESSS_VENT_TEMPERATURE_SPI_S0, INPUT);
     pinMode(TANK_DEPRESSS_VENT_TEMPERATURE_SPI_SCK, OUTPUT);
+    pinMode(BATTERY_VOLTAGE_PIN, INPUT);
     Logger::log("Sensor Module initialized.");
   }
 
@@ -57,11 +56,7 @@ public:
 
   float get_obec_battery_voltage_volt()
   {
-    return digitalRead(BATTERY_VOLTAGE_PIN);
-  }
-
-  bool get_engine_valve_open()
-  {
-    return simulated_valve_status.engine_valve_open;
+    // Logger::log(analogRead(BATTERY_VOLTAGE_PIN));
+    return (analogRead(BATTERY_VOLTAGE_PIN) / 4095.0) * 8.4/ 1000.0;
   }
 };
