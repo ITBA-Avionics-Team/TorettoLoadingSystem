@@ -75,8 +75,8 @@ class SensorModule {
     return v * 0.25;
   }
 
-  bool get_obec_connection_ok(){
-    return true; // Deprecated
+  bool get_engine_valve_open(){
+    return simulated_valve_status.engine_valve_open;
   }
 
   bool get_loading_valve_open(){

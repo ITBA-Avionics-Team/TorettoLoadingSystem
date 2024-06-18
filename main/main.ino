@@ -269,6 +269,7 @@ void update_sensor_and_weather_data() {
   system_status.ground_pressure_bar = sensor_module.get_ground_pressure_bar();
   system_status.ground_temperature_celsius = sensor_module.get_ground_temperature_celsius();
   system_status.obec_connection_ok = millis() - last_obec_status_received_milis < OBEC_CONNECTION_LOST_TIMEOUT_MILLIS;
+  system_status.engine_valve_open = sensor_module.get_engine_valve_open();
   system_status.loading_valve_open = sensor_module.get_loading_valve_open();
   system_status.hydraulic_umbrilical_connected = sensor_module.get_hydraulic_umbrilical_connected();
   system_status.hydraulic_umbrilical_finished_disconnect = sensor_module.get_hydraulic_umbrilical_finished_disconnect();
