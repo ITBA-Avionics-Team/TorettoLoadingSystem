@@ -57,6 +57,6 @@ public:
   float get_obec_battery_voltage_volt()
   {
     // Logger::log(analogRead(BATTERY_VOLTAGE_PIN));
-    return (analogRead(BATTERY_VOLTAGE_PIN) / 4095.0) * 8.4/ 1000.0;
+    return (analogRead(BATTERY_VOLTAGE_PIN) / 4095.0) * 8.4;
   }
 };
