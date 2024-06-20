@@ -50,9 +50,9 @@ class SensorModule {
     return round(adjusted_result);
   }
 
-   double adjust_loading_line_pressure_value(double value)
+   double adjust_loading_line_pressure_value(double x)
   {
-    return 1.5 * value;
+    return -79771*pow(x, 5)/38720747520 + 36847*pow(x, 4)/145566720 - 36477529*pow(x, 3)/3226728960 + 16398523*pow(x, 2)/76826880 - 4902341*x/14938560 + 10;
   }
 
   int get_ground_pressure_bar(){ // Presion en base a la corriente
@@ -95,7 +95,7 @@ class SensorModule {
     v >>= 3;
 
     // The remaining bits are the number of 0.25 degree (C) counts
-    return v * 0.25;
+    return v * 0.25 - 2;
   }
 
   bool get_engine_valve_open(){

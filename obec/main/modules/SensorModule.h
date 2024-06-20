@@ -51,7 +51,7 @@ public:
     v >>= 3;
 
     // The remaining bits are the number of 0.25 degree (C) counts
-    return v * 0.25;
+    return v * 0.25 - 2;
   }
 
   float get_obec_battery_voltage_volt()
