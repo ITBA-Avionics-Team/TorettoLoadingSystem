@@ -42,18 +42,31 @@ class SensorModule {
 
   int get_loading_line_pressure_bar(){ // Presion en base a la tension
   int readResult = analogRead(LOADING_LINE_PRESSURE_PIN);
+  Serial.println(String(readResult));
   double result = (readResult / 4095.0) * MAX_PRESSURE_VALUE_BAR;
+  double adjusted_result = adjust_loading_line_pressure_value(result);
   // Serial.println(String(readResult));
   // Serial.println(String(result));
-    return round(result);
+    return round(adjusted_result);
+  }
+
+   double adjust_loading_line_pressure_value(double value)
+  {
+    return 1.5 * value;
   }
 
   int get_ground_pressure_bar(){ // Presion en base a la corriente
   int readResult = analogRead(GROUND_PRESSURE_PIN);
   double result = (( readResult/ 4095.0) * 4.85) * 38.125 - 16.25; // 0.4v to 2V
+  double adjusted_result = adjust_ground_pressure_value(result);
   // Serial.println(String(readResult));
   // Serial.println(String(result));
-  return round(result);
+  return round(adjusted_result);
+  }
+
+    double adjust_ground_pressure_value(double value)
+  {
+    return 0.7317073 * value;
   }
 
   int get_ground_temperature_celsius() {
