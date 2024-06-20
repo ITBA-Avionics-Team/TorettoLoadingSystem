@@ -7,8 +7,8 @@
 #include <Wire.h>
 #include <SPI.h>
 
-#define LOADING_LINE_PRESSURE_PIN 26 // Analógico, medimos voltaje y hay relación lineal con la presión
-#define GROUND_PRESSURE_PIN 33 // Analógico, medimos corriente
+#define LOADING_LINE_PRESSURE_PIN 25 // Analógico, medimos voltaje y hay relación lineal con la presión
+#define GROUND_PRESSURE_PIN 26 // Analógico, medimos corriente
 #define GROUND_TEMPERATURE_SPI_SCK 4
 #define GROUND_TEMPERATURE_SPI_CS 2
 #define GROUND_TEMPERATURE_SPI_S0 15
@@ -35,15 +35,25 @@ class SensorModule {
     pinMode(GROUND_TEMPERATURE_SPI_SCK, OUTPUT);
     pinMode(UMBRILICAL_CONNECTED_PIN, INPUT_PULLUP);
     pinMode(UMBRILICAL_FINISHED_DISCONNECT_PIN, INPUT_PULLUP);
+    pinMode(GROUND_PRESSURE_PIN, INPUT);
+    pinMode(LOADING_LINE_PRESSURE_PIN, INPUT);
     Logger::log("Sensor Module initialized.");
   }
 
   int get_loading_line_pressure_bar(){ // Presion en base a la tension
-    return (analogRead(LOADING_LINE_PRESSURE_PIN) / 4095.0) * MAX_PRESSURE_VALUE_BAR;
+  int readResult = analogRead(LOADING_LINE_PRESSURE_PIN);
+  double result = (readResult / 4095.0) * MAX_PRESSURE_VALUE_BAR;
+  // Serial.println(String(readResult));
+  // Serial.println(String(result));
+    return round(result);
   }
 
   int get_ground_pressure_bar(){ // Presion en base a la corriente
-    return ((analogRead(GROUND_PRESSURE_PIN) - 400.0) / 1600.0) * 60.0 + 1.0;
+  int readResult = analogRead(GROUND_PRESSURE_PIN);
+  double result = (( readResult/ 4095.0) * 4.85) * 38.125 - 16.25; // 0.4v to 2V
+  // Serial.println(String(readResult));
+  // Serial.println(String(result));
+  return round(result);
   }
 
   int get_ground_temperature_celsius() {
